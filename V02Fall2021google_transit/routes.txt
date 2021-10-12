@@ -1,0 +1,45 @@
+route_id,route_short_name,route_long_name,route_desc,route_url,route_color,route_text_color,route_type
+150,150,Haile Plantation,,http://www.go-rts.com/schedule.php,FF7F50,,3
+75,75,Oaks Mall To Butler Plaza,,http://www.go-rts.com/schedule.php,E4AAAC,,3
+118,118,Park-N-Ride 1 (Cultural Plaza) To The Hub,,http://www.go-rts.com/campus-routes.php,BBD147,,3
+21,21,Reitz Union To Cabana Beach,,http://www.go-rts.com/schedule.php,D6803B,,3
+17,17,Beaty Towers To Downtown Station,,http://www.go-rts.com/schedule.php,B0312B,,3
+10,10,Downtown Station To Santa Fe College,,http://www.go-rts.com/schedule.php,2CA4E2,,3
+15,15,Downtown Station To NW 13 Street/NW 23 Avenue,,http://www.go-rts.com/schedule.php,449A57,,3
+125,125,Lakeside,,http://www.go-rts.com/campus-routes.php,CA0088,,3
+12,12,Reitz Union To Butler Plaza Transfer Station,,http://www.go-rts.com/schedule.php,B27B55,,3
+7,7,Downtown Station To Eastwood Meadows,,http://www.go-rts.com/schedule.php,CC2575,,3
+126,126,UF East/West Circulator (Lakeside To Sorority Row),,http://www.go-rts.com/campus-routes.php,7CC6F3,,3
+2,2,Downtown Station To Walmart Supercenter (NE 12 AVE),,http://www.go-rts.com/schedule.php,D88257,,3
+38,38,The Hub To Gainesville Place,,http://www.go-rts.com/schedule.php,1EA89C,,3
+800,800,Santa Fe To Butler Plaza Transfer Station,,http://www.go-rts.com/saturdays.php,00CED1,,3
+3,3,Downtown Station To N Main Post Office,,http://www.go-rts.com/schedule.php,20B2AA,,3
+8,8,UF Health To N Walmart Supercenter,,http://www.go-rts.com/schedule.php,FF7B00,,3
+5,5,Downtown Station To Oaks Mall,,http://www.go-rts.com/schedule.php,777A56,,3
+36,36,The Hub To Williston Plaza,,http://www.go-rts.com/schedule.php,D00073,,3
+28,28,The Hub To Butler Plaza TS,,http://www.go-rts.com/schedule.php,9CC77D,,3
+26,26,Downtown Station To GNV Airport,,http://www.go-rts.com/schedule.php,94256C,,3
+13,13,Beaty Towers To Cottage Grove Apartments,,http://www.go-rts.com/schedule.php,49535A,,3
+25,25,UF Commuter Lot to Airport,,http://www.go-rts.com/schedule.php,8FBC8F,,3
+11,11,Downtown Station To Eastwood Meadows,,http://www.go-rts.com/schedule.php,9E8A6C,,3
+711,711,Downtown Station To Eastwood Meadows,,http://www.go-rts.com/schedule.php,7B4E5A,,3
+16,16,Beaty Towers To Sugar Hill,,http://www.go-rts.com/schedule.php,929496,,3
+23,23,Oaks Mall To Santa Fe College,,http://www.go-rts.com/schedule.php,B49F33,,3
+43,43,UF Health To Santa Fe College,,http://www.go-rts.com/schedule.php,3365DE,,3
+9,9,Reitz Union To Hunters Run,,http://www.go-rts.com/schedule.php,ACC24C,,3
+119,119,Family Housing To The Hub,,http://www.go-rts.com/campus-routes.php,F165DE,,3
+35,35,Reitz Union To SW 35 Place,,http://www.go-rts.com/schedule.php,00ACEC,,3
+34,34,The Hub To Lexington Crossing,,http://www.go-rts.com/schedule.php,CA3132,,3
+6,6,Downtown Station To N Walmart Supercenter,,http://www.go-rts.com/schedule.php,74797D,,3
+127,127,East Circulator (Turlington Hall To Sorority Row),,http://www.go-rts.com/campus-routes.php,6FB353,,3
+122,122,UF North/South Circulator,,http://www.go-rts.com/campus-routes.php,FFF22D,,3
+37,37,Reitz Union To Butler Plaza,,http://www.go-rts.com/schedule.php,0A8E33,,3
+27,27,Downtown Station To Walmart Supercenter(NE 12 AVE),,http://www.go-rts.com/schedule.php,6A6051,,3
+40,40,The Hub To Hunters Crossing,,http://www.go-rts.com/schedule.php,FFD5A5,,3
+33,33,Celebration Pointe To Midtown,,http://www.go-rts.com/schedule.php,CA0088,,3
+121,121,Hub To Commuter Lot,,http://www.go-rts.com/campus-routes.php,FFA500,,3
+20,20,Reitz Union To Oaks Mall,,http://www.go-rts.com/schedule.php,42B4ED,,3
+46,46,Reitz Union To Downtown Station,,http://www.go-rts.com/schedule.php,88809A,,3
+1,1,Downtown Station To Butler Plaza,,http://www.go-rts.com/schedule.php,6373B4,,3
+76,76,Haile Plantation To Santa Fe College,,http://www.go-rts.com/schedule.php,C57F30,,3
+24,24,Downtown Station To Job Corps,,http://www.go-rts.com/schedule.php,9894C6,,3

@@ -9,4 +9,4 @@ out_file = sys.argv[2]
 cols = sys.argv[3:]
 
 read_file = pd.read_csv (in_file)
-read_file.to_csv (out_file, index=None, quoting=csv.QUOTE_NONNUMERIC, columns=cols)
+read_file.to_csv (out_file, index=None, quoting=csv.QUOTE_ALL, columns=cols)

@@ -23,8 +23,6 @@ const firebaseConfig = {
 };
 
 
-
-
 admin.initializeApp(firebaseConfig);
 const db = admin.firestore();
 

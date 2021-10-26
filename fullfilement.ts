@@ -11,15 +11,20 @@ process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
 
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCkTlrbFzmredqfkTyZ-gHwBwff_jpibUU",
-    authDomain: "busbuddy-3e804.firebaseapp.com",
-    databaseURL: "https://busbuddy-3e804-default-rtdb.firebaseio.com",
-    projectId: "busbuddy-3e804",
-    storageBucket: "busbuddy-3e804.appspot.com",
-    messagingSenderId: "680726620470",
-    appId: "1:680726620470:web:882f9dc1c5f5865dd32b97",
-    measurementId: "G-7YJ8L8W4QW"
+    type: "service_account",
+    project_id: "busbuddy-3e804",
+    private_key_id: "179675ce3b6354f727775184caa1077b0bbe6e3b",
+    client_email: "firebase-adminsdk-w19fw@busbuddy-3e804.iam.gserviceaccount.com",
+    client_id: "100270686659460242648",
+    auth_uri: "https://accounts.google.com/o/oauth2/auth",
+    token_uri: "https://oauth2.googleapis.com/token",
+    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+    client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-w19fw%40busbuddy-3e804.iam.gserviceaccount.com"
 };
+
+
+
+
 admin.initializeApp(firebaseConfig);
 const db = admin.firestore();
 
@@ -40,14 +45,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function nameClosestStop(agent) {
         // agent.add(`!!!!!!!`);
         const dialogflowAgentDoc =
-            db.collection('busbuddy_collection').doc('VLqAAPNr74xIFP6sWKpy');
+            db.collection('test_collection').doc('test_doc');
         return dialogflowAgentDoc.get()
             .then(doc => {
                 if (!doc.exists) {
                     console.log('11111111111');
                     agent.add('No data found in the database!');
                 } else {
-                    var s = doc.data().name;
+                    var s = doc.data().test_id;
                     console.log('2222222222222', s);
                     agent.add("doc.data().name" + s);
                 }
@@ -91,7 +96,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     let intentMap = new Map();
     intentMap.set('Default Welcome Intent', welcome);
     intentMap.set('Default Fallback Intent', fallback);
-    intentMap.set('nameClosestStop', nameClosestStop);
+    intentMap.set('getClosestStopName', nameClosestStop);
     // intentMap.set('your intent name here', googleAssistantHandler);
     agent.handleRequest(intentMap);
 });

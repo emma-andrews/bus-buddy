@@ -1,3 +1,4 @@
+trip_id,arrival_time,departure_time,stop_id,stop_sequence,timepoint
 7524377,15:44:00,15:44:00,1392,14,0
 7524377,15:45:00,15:45:00,1393,15,0
 7524377,15:46:00,15:46:00,512,16,0

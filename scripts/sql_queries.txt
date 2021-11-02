@@ -1,0 +1,2 @@
+select distinct stops.stop_id, stops.stop_name, stops.stop_desc, trips.route_id into outfile '/var/lib/mysql-files/data_distinct.csv' fields terminated by ',' lines terminated by '\n' FROM stops, trips, times where stops.stop_id = times.stop_id and times.trip_id = trips.trip_id;
+

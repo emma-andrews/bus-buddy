@@ -31,6 +31,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
     console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
 
+      // variable slots
+      let lastDepartureName = "";  // "last" is used instead of "most recent" because it's shorter
+      let lastDestinationName = "";
+      let lastDepartureNumber = "";
+      let lastDestinationNumber = "";
+      let lastRoute = "";
+
     function welcome(agent) {
         agent.add(`Welcome to BusBuddy!`);
     }
@@ -39,6 +46,43 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         agent.add(`I didn't understand`);
         agent.add(`I'm sorry, can you try again?`);
     }
+
+    // function that will fill the slots about getting somewhere
+    function fillSlots(input) {
+        // in order to make decisions about a route, we need to know from destination, departure, and route
+        const departureName = input.parameters.DepartureStopName;
+        const destinationName = input.parameters.DestinationStopName;
+        const departureNumber = input.parameters.DepartureStopNumber;
+        const destinationNumber = input.parameters.DestinationStopNumber;
+        const route = input.parameters.Route;
+  
+        const departureNameGiven = departureName.length > 0;  // if there is a name, this returns true
+        const destinationNameGiven = destinationName.length > 0;  // if there is a name, this returns true
+        const departureNumberGiven = departureNumber.length > 0;  // if there is a number, this returns true
+        const destinationNumberGiven = destinationNumber.length > 0;  // if there is a number, this returns true
+        const routeGiven = route.length > 0;
+  
+        if(departureNameGiven)  // if a new departure name was given, replace the old one
+        {
+          lastDepartureName = departureName;
+        }
+        if(destinationNameGiven)
+        {
+          lastDestinationName = destinationName;
+        }
+        if(departureNumberGiven)
+        {
+          lastDepartureNumber = departureName;
+        }
+        if(destinationNumberGiven)
+        {
+          lastDestinationNumber = destinationNumber;
+        }
+        if(routeGiven)
+        {
+          lastRoute = route;
+        }
+      }	// end of fillSlots function
 
     function nameClosestStop(agent) {
         // agent.add(`!!!!!!!`);

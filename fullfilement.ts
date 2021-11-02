@@ -31,12 +31,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
     console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
 
-      // variable slots
-      let lastDepartureName = "";  // "last" is used instead of "most recent" because it's shorter
-      let lastDestinationName = "";
-      let lastDepartureNumber = "";
-      let lastDestinationNumber = "";
-      let lastRoute = "";
+    // variable slots
+    let lastDepartureName = "";  // "last" is used instead of "most recent" because it's shorter
+    let lastDestinationName = "";
+    let lastDepartureNumber = "";
+    let lastDestinationNumber = "";
+    let lastRoute = "";
 
     function welcome(agent) {
         agent.add(`Welcome to BusBuddy!`);
@@ -55,54 +55,48 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const departureNumber = input.parameters.DepartureStopNumber;
         const destinationNumber = input.parameters.DestinationStopNumber;
         const route = input.parameters.Route;
-  
+
         const departureNameGiven = departureName.length > 0;  // if there is a name, this returns true
         const destinationNameGiven = destinationName.length > 0;  // if there is a name, this returns true
         const departureNumberGiven = departureNumber.length > 0;  // if there is a number, this returns true
         const destinationNumberGiven = destinationNumber.length > 0;  // if there is a number, this returns true
         const routeGiven = route.length > 0;
-  
-        if(departureNameGiven)  // if a new departure name was given, replace the old one
+
+        if (departureNameGiven)  // if a new departure name was given, replace the old one
         {
-          lastDepartureName = departureName;
+            lastDepartureName = departureName;
         }
-        if(destinationNameGiven)
-        {
-          lastDestinationName = destinationName;
+        if (destinationNameGiven) {
+            lastDestinationName = destinationName;
         }
-        if(departureNumberGiven)
-        {
-          lastDepartureNumber = departureName;
+        if (departureNumberGiven) {
+            lastDepartureNumber = departureName;
         }
-        if(destinationNumberGiven)
-        {
-          lastDestinationNumber = destinationNumber;
+        if (destinationNumberGiven) {
+            lastDestinationNumber = destinationNumber;
         }
-        if(routeGiven)
-        {
-          lastRoute = route;
+        if (routeGiven) {
+            lastRoute = route;
         }
-      }	// end of fillSlots function
+    }	// end of fillSlots function
 
     function nameClosestStop(agent) {
         // agent.add(`!!!!!!!`);
-        const dialogflowAgentDoc =
-            db.collection('test_collection').doc('test_doc');
-        return dialogflowAgentDoc.get()
-            .then(doc => {
-                if (!doc.exists) {
-                    console.log('11111111111');
-                    agent.add('No data found in the database!');
-                } else {
-                    var s = doc.data().test_id;
-                    console.log('2222222222222', s);
-                    agent.add("doc.data().name" + s);
-                }
-                // return Promise.resolve('Read complete');
-            }).catch(() => {
-                agent.add('Error reading entry from the Firestore database.');
-                agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
-            });
+        const doc = db.collection('test_collection').doc('test_doc');
+        return doc.get().then(doc => {
+            if (!doc.exists) {
+                console.log('11111111111');
+                agent.add('No data found in the database!');
+            } else {
+                var s = doc.data().test_id;
+                console.log('2222222222222', s);
+                agent.add("doc.data().name" + s);
+            }
+            // return Promise.resolve('Read complete');
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
+        });
     }
 
     // // Uncomment and edit to make your own intent handler

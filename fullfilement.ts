@@ -82,15 +82,15 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     function nameClosestStop(agent) {
         // agent.add(`!!!!!!!`);
-        const doc = db.collection('test_collection').doc('test_doc');
+        const doc = db.collection('data_distinct').doc('0');
         return doc.get().then(doc => {
             if (!doc.exists) {
                 console.log('11111111111');
                 agent.add('No data found in the database!');
             } else {
-                var s = doc.data().test_id;
+                var s = doc.data().stop_name;
                 console.log('2222222222222', s);
-                agent.add("doc.data().name" + s);
+                agent.add("Stop: " + s);
             }
             // return Promise.resolve('Read complete');
         }).catch(() => {

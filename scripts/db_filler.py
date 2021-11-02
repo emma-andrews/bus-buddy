@@ -3,7 +3,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 import os
 
-DB_CONF_PATH = "db_config.json"
+DB_CONF_PATH = r"C:\Users\ccdre\OneDrive\Get Things Done\Courses\CIS6930 - Spoken Dialogue Systems\bus-buddy\db_config.json"
 cred = credentials.Certificate(DB_CONF_PATH)
 firebase_admin.initialize_app(cred)
 
@@ -46,11 +46,12 @@ shapes.txt   ???????
 stop_times.txt ?????
 # trips.txt
 """
-dir = ".\\V02Fall2021google_transit\\"
-files_path = [os.path.abspath(os.path.join(dir, x)) for x in os.listdir(dir)]
+# dir = ".\\V02Fall2021google_transit\\"
+# files_path = [os.path.abspath(os.path.join(dir, x)) for x in os.listdir(dir)]
+dir = ".\\csvs\\"
 files_path = [
-    dir + "shapes.txt",
-    dir + "stop_times.txt",
+    # dir + "data_distinct.csv",
+    "C:\Users\ccdre\OneDrive\Get Things Done\Courses\CIS6930 - Spoken Dialogue Systems\bus-buddy\csvs\data_distinct.csv"
 ]
 for i in files_path:
     loadFromTxt(i)

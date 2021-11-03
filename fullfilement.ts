@@ -99,6 +99,25 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         });
     }
 
+    // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
+    function getRouteID_noContext(agent) {
+        const doc = db.collection('data_distinct').doc('0');
+        return doc.get().then(doc => {
+            if (!doc.exists) {
+                console.log('getRouteID_noContext ' + agent);
+                agent.add('No data found in the database!');
+            } else {
+                var stop = doc.data().stop_name;
+                console.log('Found a doc', stop, agent);
+                agent.add("Stop: " + stop);
+            }
+            // return Promise.resolve('Read complete');
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
+        });
+    }
+
     // // Uncomment and edit to make your own intent handler
     // // uncomment `intentMap.set('your intent name here', yourFunctionHandler);`
     // // below to get this function to be run when a Dialogflow intent is matched
@@ -133,6 +152,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('Default Welcome Intent', welcome);
     intentMap.set('Default Fallback Intent', fallback);
     intentMap.set('getClosestStopName', nameClosestStop);
+    intentMap.set('getRouteID-noContext', getRouteID_noContext);
     // intentMap.set('your intent name here', googleAssistantHandler);
     agent.handleRequest(intentMap);
 });

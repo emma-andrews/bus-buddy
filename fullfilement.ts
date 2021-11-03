@@ -7,8 +7,9 @@ const { WebhookClient } = require('dialogflow-fulfillment');
 const { Card, Suggestion } = require('dialogflow-fulfillment');
 const admin = require("firebase-admin");
 
-process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
+const PLACEHOLDER = "[TODO IN FULFILLMENT]";
 
+process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
 
 const firebaseConfig = {
     type: "service_account",
@@ -21,8 +22,6 @@ const firebaseConfig = {
     auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
     client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-w19fw%40busbuddy-3e804.iam.gserviceaccount.com"
 };
-
-
 admin.initializeApp(firebaseConfig);
 const db = admin.firestore();
 
@@ -85,12 +84,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const doc = db.collection('data_distinct').doc('0');
         return doc.get().then(doc => {
             if (!doc.exists) {
-                console.log('11111111111');
                 agent.add('No data found in the database!');
             } else {
+                var textresponse = request.body.queryResult.fulfillmentText + " ";
                 var s = doc.data().stop_name;
-                console.log('2222222222222', s);
-                agent.add("Stop: " + s);
+                textresponse = textresponse.replace(PLACEHOLDER, s);
+                console.log('2222222222222', s, PLACEHOLDER, textresponse);
+                agent.add(textresponse);
             }
             // return Promise.resolve('Read complete');
         }).catch(() => {

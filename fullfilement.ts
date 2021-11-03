@@ -101,15 +101,34 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
     function getRouteID_noContext(agent) {
-        const doc = db.collection('data_distinct').doc('0');
+        let doc = db.collection('data_distinct').doc('0');
+        console.log("you've entered the getRouteID_noContext");
+        // create a list of documents that match the specific bus stop name
+        let list = [];
+        // iterate through the documents
+        for(let i = 0; i < db.collection('data_distinct').count(); i++)
+        {
+            doc = db.collection('data_distinct').doc(i);
+            if(doc.exists)  // if the document exists
+            {
+                if(agent.parameters.StopName == doc.data().stop_name)   // if the document there has the correct information
+                {
+                    console.log("found one in document number " + i);
+                    list.push(db.collection('data_distinct').doc(i));
+                }
+                    
+            }
+            
+            
+        }
         return doc.get().then(doc => {
             if (!doc.exists) {
                 console.log('getRouteID_noContext ' + agent);
                 agent.add('No data found in the database!');
-            } else {
+            } else {    
                 var stop = doc.data().stop_name;
-                console.log('Found a doc', stop, agent);
-                agent.add("Stop: " + stop);
+                console.log('Most recent doc', stop, agent);
+                agent.add("Most recent stop: " + stop);
             }
             // return Promise.resolve('Read complete');
         }).catch(() => {

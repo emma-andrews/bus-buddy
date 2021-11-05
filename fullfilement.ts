@@ -99,6 +99,52 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         });
     }
 
+    function getRouteID_context(agent) {
+        var contexts = request.body.queryResult.outputContexts;
+        var closest;
+        var routes = [];
+        var doc = db.collection('data_distinct').doc('0');
+        console.log("ctx: " + contexts[0].name);
+        var ctx = agent.contexts;
+        console.log("ctx2: " + ctx);
+        console.log("1. " + ctx['closeststopname'].parameters);
+        for (var j = 0; j < contexts.count(); j++)
+        {
+            if (contexts[j].includes("closeststopname"))
+            {
+                closest = contexts[j];
+                console.log("closest: " + closest);
+            }
+        }
+        
+        for (var i = 0; i < db.collection('data_distinct').count(); i++)
+        {
+            doc = db.collection('data_distinct').doc(i);
+            if (doc.exists)
+            {
+                if (closest === doc.data().stop_name)
+                {
+                    routes.push(doc.data().route_id);
+                    console.log("route: " + doc.data().route_id);
+                }
+            }
+        }
+        return doc.get().then(doc => {
+            if (!doc.exists) {
+                console.log('getRouteID_context ' + agent);
+                agent.add('No data found in the database!');
+            } else {    
+                var stop = doc.data().stop_name;
+                console.log('Most recent doc', stop, agent);
+                agent.add("Most recent stop: " + stop);
+            }
+            // return Promise.resolve('Read complete');
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
+        });
+    }
+
     // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
     function getRouteID_noContext(agent) {
         let doc = db.collection('data_distinct').doc('0');
@@ -171,6 +217,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('Default Welcome Intent', welcome);
     intentMap.set('Default Fallback Intent', fallback);
     intentMap.set('getClosestStopName', nameClosestStop);
+    intentMap.set('getRouteID-context', getRouteID_context);
     intentMap.set('getRouteID-noContext', getRouteID_noContext);
     // intentMap.set('your intent name here', googleAssistantHandler);
     agent.handleRequest(intentMap);

@@ -103,52 +103,33 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     function getRouteID_context(agent) {
-        //var contexts = request.body.queryResult.outputContexts;
-        var contexts = agent.getContext('closeststopname');
-        var closest;
+        var contexts = agent.getContexts('closeststopname');
+        var closest = contexts.parameters.ClosestStop;
         var routes = [];
-        var doc = db.collection('data_distinct').doc('0');
-        //console.log("ctx: " + contexts[0].name);
-        console.log("CTX ClosestStop: " + contexts.parameters.ClosestStop);
+        var selectedDoc = db.collection('data_distinct').doc('0');
 
-        //console.log("ctx2: " + ctx);
-        //console.log("1. " + ctx['closeststopname'].parameters);
-        /*for (var j = 0; j < contexts.count(); j++) {
-            if (contexts[j].includes("closeststopname")) {
-                closest = contexts[j];
-                console.log("closest: " + closest);
-            }
-        }
-
-        for (var i = 0; i < db.collection('data_distinct').count(); i++) {
-            doc = db.collection('data_distinct').doc(i);
-            if (doc.exists) {
-                if (closest === doc.data().stop_name) {
+        const query = db.collection('data_distinct');
+        query.get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                if (doc.data().stop_name === closest)
+                {
                     routes.push(doc.data().route_id);
-                    console.log("route: " + doc.data().route_id);
                 }
-            }
-        }
-        */
-        return doc.get().then(doc => {
-            if (!doc.exists) {
-                console.log('getRouteID_context ' + agent);
-                agent.add('No data found in the database!');
-            } else {
-                var stop = doc.data().stop_name;
-                console.log('Most recent doc', stop, agent);
-
-                //var ctxClosest = contexts[1].parameters.ClosestStop;
-                //var textresponse = request.body.queryResult.fulfillmentText + " ";
-                //textresponse = textresponse.replace("context.closeststopname", ctxClosest);
-                //agent.add(textresponse);
-                agent.add("The stop at " + contexts.parameters.ClosestStop + " is served by routes...");
-            }
-            // return Promise.resolve('Read complete');
-        }).catch(() => {
-            agent.add('Error reading entry from the Firestore database.');
-            agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
+            })
         });
+
+        agent.setContext({
+            name: 'busrouteidlist',
+            lifespan: 1,
+            parameters: {
+                routes: routes
+            }
+        });
+
+        var routesStr = "";
+        routes.forEach(route => routesStr = routesStr + route);
+
+        agent.add("The stop at " + contexts.parameters.ClosestStop + " is served by routes " + routesStr);
     }
 
     // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"

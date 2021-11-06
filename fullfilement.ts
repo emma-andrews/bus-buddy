@@ -95,7 +95,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 var s = doc.data().stop_name;
                 textresponse = textresponse.replace(PLACEHOLDER, s);
                 console.log('Manually setting The HUB as closest stop', s, PLACEHOLDER, textresponse);
-                //agent.add(textresponse);
+                agent.add(textresponse);
             }
             // return Promise.resolve('Read complete');
         }).catch(() => {
@@ -113,7 +113,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         console.log("ctx1 params: " + contexts[1].parameters.ClosestStop);
         var ctx = agent.contexts;
         console.log("ctx2: " + ctx);
-        console.log("1. " + ctx['closeststopname'].parameters);
+        //console.log("1. " + ctx['closeststopname'].parameters);
         for (var j = 0; j < contexts.count(); j++) {
             if (contexts[j].includes("closeststopname")) {
                 closest = contexts[j];

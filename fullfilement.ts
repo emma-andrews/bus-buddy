@@ -163,8 +163,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 // create a list of documents that match the specific bus stop name
                 var list = [];
                 // iterate through the documents
+                console.log("created a list");
                 for(var i = 0; i < db.collection('data_distinct').count(); i++)
                 {
+                  console.log("entered the for loop");
                     doc = db.collection('data_distinct').doc(i);
                     if(doc.exists)  // if the document exists
                     {

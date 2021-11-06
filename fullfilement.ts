@@ -81,7 +81,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     function nameClosestStop(agent) {
         // agent.add(`!!!!!!!`);
-        const doc = db.collection('data_distinct').doc('0');
+        //db.collection('stops').doc('392') is location of The Hub data
+        const doc = db.collection('stops').doc('392');
         return doc.get().then(doc => {
             if (!doc.exists) {
                 agent.add('No data found in the database!');
@@ -89,7 +90,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 var textresponse = request.body.queryResult.fulfillmentText + " ";
                 var s = doc.data().stop_name;
                 textresponse = textresponse.replace(PLACEHOLDER, s);
-                console.log('2222222222222', s, PLACEHOLDER, textresponse);
+                console.log('Manually setting The HUB as closest stop', s, PLACEHOLDER, textresponse);
                 agent.add(textresponse);
             }
             // return Promise.resolve('Read complete');

@@ -12,15 +12,12 @@ const PLACEHOLDER = "[TODO IN FULFILLMENT]";
 process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
 
 const firebaseConfig = {
-    type: "service_account",
-    project_id: "busbuddy-3e804",
-    private_key_id: "179675ce3b6354f727775184caa1077b0bbe6e3b",
-    client_email: "firebase-adminsdk-w19fw@busbuddy-3e804.iam.gserviceaccount.com",
-    client_id: "100270686659460242648",
-    auth_uri: "https://accounts.google.com/o/oauth2/auth",
-    token_uri: "https://oauth2.googleapis.com/token",
-    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-    client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-w19fw%40busbuddy-3e804.iam.gserviceaccount.com"
+    apiKey: "AIzaSyCjymcr-nHciYTjTdgRHRew7oQ6_-s6G7Y",
+    authDomain: "bus-buddy-382e6.firebaseapp.com",
+    projectId: "bus-buddy-382e6",
+    storageBucket: "bus-buddy-382e6.appspot.com",
+    messagingSenderId: "238577298800",
+    appId: "1:238577298800:web:fb63e530ad39440a89b3b5"
 };
 admin.initializeApp(firebaseConfig);
 const db = admin.firestore();
@@ -190,6 +187,53 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         });
     }
 
+    // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
+    function getSomewhere(agent) {
+        console.log(request.body.queryResult.fulfillmentText);
+        console.log("-------------------------");
+        console.log(request.body.queryResult.outputContexts);
+        console.log("++++++++++++++++++++++++");
+        agent.add('1111');
+
+        // var contexts = request.body.queryResult.outputContexts;
+        // var closest;
+        // var routes = [];
+        // var doc = db.collection('data_distinct').doc('0');
+        // console.log("ctx: " + contexts[0].name);
+        // var ctx = agent.contexts;
+        // console.log("ctx2: " + ctx);
+        // console.log("1. " + ctx['closeststopname'].parameters);
+        // for (var j = 0; j < contexts.count(); j++) {
+        //     if (contexts[j].includes("closeststopname")) {
+        //         closest = contexts[j];
+        //         console.log("closest: " + closest);
+        //     }
+        // }
+
+        // for (var i = 0; i < db.collection('data_distinct').count(); i++) {
+        //     doc = db.collection('data_distinct').doc(i);
+        //     if (doc.exists) {
+        //         if (closest === doc.data().stop_name) {
+        //             routes.push(doc.data().route_id);
+        //             console.log("route: " + doc.data().route_id);
+        //         }
+        //     }
+        // }
+        // return doc.get().then(doc => {
+        //     if (!doc.exists) {
+        //         console.log('getRouteID_context ' + agent);
+        //         agent.add('No data found in the database!');
+        //     } else {
+        //         var stop = doc.data().stop_name;
+        //         console.log('Most recent doc', stop, agent);
+        //         agent.add("Most recent stop: " + stop);
+        //     }
+        //     // return Promise.resolve('Read complete');
+        // }).catch(() => {
+        //     agent.add('Error reading entry from the Firestore database.');
+        //     agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
+        // });
+    }
     // // Uncomment and edit to make your own intent handler
     // // uncomment `intentMap.set('your intent name here', yourFunctionHandler);`
     // // below to get this function to be run when a Dialogflow intent is matched
@@ -226,6 +270,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('getClosestStopName', nameClosestStop);
     intentMap.set('getRouteID-context', getRouteID_context);
     intentMap.set('getRouteID-noContext', getRouteID_noContext);
+    intentMap.set('getSomewhere', getSomewhere);
     // intentMap.set('your intent name here', googleAssistantHandler);
     agent.handleRequest(intentMap);
 });

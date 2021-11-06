@@ -155,8 +155,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
     function getRouteID_noContext(agent) {
-        let doc = db.collection('data_distinct').doc('0');
         console.log("you've entered the getRouteID_noContext");
+        var doc = db.collection('data_distinct').doc('0');
+        console.log("successfully set doc to ");
+        console.log(doc.data().stop_name);
+        console.log("I just logged the stop name");
+        
         // create a list of documents that match the specific bus stop name
         let list = [];
         // iterate through the documents

@@ -174,6 +174,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     querySnapshot.forEach(function(doc) {
                         // doc.data() is never undefined for query doc snapshots
                         console.log(doc.id, " => ", doc.data());
+                        console.log("the doc.id is " + doc.id + " and the route is " + doc.data().route_id);
                         // list.push(doc.id);
                     });
                 })

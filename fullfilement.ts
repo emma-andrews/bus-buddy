@@ -137,6 +137,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         console.log("you've entered the getRouteID_noContext");
         var doc = db.collection('data_distinct').doc('0');
         var targetStop = agent.parameters.StopName;
+        console.log("target stop is " + targetStop);
         return doc.get().then(doc => {
             if (!doc.exists) {
                 console.log('getRouteID_noContext ' + agent);
@@ -182,11 +183,11 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     console.log("Error getting documents: ", error);
                 });
                 
-                var toReturn = "The following routes go to " + agent.parameters.StopName;
-                for(var i = 0; i < list.count(); i++)
-                {
-                    toReturn = toReturn + " " + list[i].route_id;
-                }
+                var toReturn = "The following routes go to " + targetStop;
+                // for(var i = 0; i < list.count(); i++)
+                // {
+                //     toReturn = toReturn + " " + list[i].route_id;
+                // }
               	agent.add(toReturn);
                 //var stop = doc.data().stop_name;
                 //console.log('Most recent doc', stop, agent);

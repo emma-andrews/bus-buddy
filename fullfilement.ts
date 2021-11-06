@@ -98,8 +98,38 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         });
     }
 
-    function getEstimatedETA(agent) {
-        var contexts = 
+    function getEstimatedETA_context_noRoute(agent) {
+        var contexts = agent.getContexts('closeststopname');
+        var soonestBusRouteID;
+        var timePeriod;
+
+        agent.add('The next ' + soonestBusRouteID + ' arrives at ' + contexts.parameter.ClosestStop + ' in about ' + timePeriod + ' minutes.');
+
+    }
+
+    function getEstimatedETA_context_route(agent) {
+        var contexts = agent.getContexts('closeststopname');
+        var timePeriod;
+
+        agent.add('The next ' + agent.parameters.busrouteid + ' arrives at ' + contexts.parameter.ClosestStop + ' in about ' + timePeriod + ' minutes.');
+
+    }
+
+    function getEstimatedETA_noContext_noRoute(agent) {
+        var soonestBusRouteID;
+        var timePeriod;
+
+        agent.add('The next ' + soonestBusRouteID + ' arrives at ' + agent.parameter.stopname + ' in about ' + timePeriod + ' minutes.');
+
+
+    }
+
+    function getEstimatedETA_noContext_route(agent) {
+        var timePeriod;
+
+        agent.add('The next ' + agent.parameters.busrouteid + ' arrives at ' + agent.parameter.stopname + ' in about ' + timePeriod + ' minutes.');
+
+
     }
 
     function getRouteID_context(agent) {

@@ -12,15 +12,12 @@ const PLACEHOLDER = "[TODO IN FULFILLMENT]";
 process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
 
 const firebaseConfig = {
-    type: "service_account",
-    project_id: "busbuddy-3e804",
-    private_key_id: "179675ce3b6354f727775184caa1077b0bbe6e3b",
-    client_email: "firebase-adminsdk-w19fw@busbuddy-3e804.iam.gserviceaccount.com",
-    client_id: "100270686659460242648",
-    auth_uri: "https://accounts.google.com/o/oauth2/auth",
-    token_uri: "https://oauth2.googleapis.com/token",
-    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-    client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-w19fw%40busbuddy-3e804.iam.gserviceaccount.com"
+    apiKey: "AIzaSyCjymcr-nHciYTjTdgRHRew7oQ6_-s6G7Y",
+    authDomain: "bus-buddy-382e6.firebaseapp.com",
+    projectId: "bus-buddy-382e6",
+    storageBucket: "bus-buddy-382e6.appspot.com",
+    messagingSenderId: "238577298800",
+    appId: "1:238577298800:web:fb63e530ad39440a89b3b5"
 };
 admin.initializeApp(firebaseConfig);
 const db = admin.firestore();

@@ -83,6 +83,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         // agent.add(`!!!!!!!`);
         //db.collection('stops').doc('392') is location of The Hub data
         const doc = db.collection('stops').doc('392');
+
+        //var oContexts = request.body.queryResult.outputContexts;
+
+        //console.log("oContexts: " + oContexts[0].name);
+        var ctx = agent.contexts;
+        console.log("CURRENT CONTEXT: " + ctx);
+
         return doc.get().then(doc => {
             if (!doc.exists) {
                 agent.add('No data found in the database!');

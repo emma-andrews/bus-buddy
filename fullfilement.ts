@@ -150,35 +150,44 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function getRouteID_noContext(agent) {
         console.log("you've entered the getRouteID_noContext");
         var doc = db.collection('data_distinct').doc('0');
-        console.log("successfully set doc to ");
-        console.log(doc.data().stop_name);
-        console.log("I just logged the stop name");
-
-        // create a list of documents that match the specific bus stop name
-        let list = [];
-        // iterate through the documents
-        for (let i = 0; i < db.collection('data_distinct').count(); i++) {
-            doc = db.collection('data_distinct').doc(i);
-            if (doc.exists)  // if the document exists
-            {
-                if (agent.parameters.StopName == doc.data().stop_name)   // if the document there has the correct information
-                {
-                    console.log("found one in document number " + i);
-                    list.push(db.collection('data_distinct').doc(i));
-                }
-
-            }
-
-
-        }
         return doc.get().then(doc => {
             if (!doc.exists) {
                 console.log('getRouteID_noContext ' + agent);
                 agent.add('No data found in the database!');
             } else {
-                var stop = doc.data().stop_name;
-                console.log('Most recent doc', stop, agent);
-                agent.add("Most recent stop: " + stop);
+                // attempt to see if it works
+                console.log("successfully set doc to ");
+                console.log(doc.data().stop_name);
+                console.log("I just logged the stop name");
+                
+                // create a list of documents that match the specific bus stop name
+                var list = [];
+                // iterate through the documents
+                for(var i = 0; i < db.collection('data_distinct').count(); i++)
+                {
+                    doc = db.collection('data_distinct').doc(i);
+                    if(doc.exists)  // if the document exists
+                    {
+                        if(agent.parameters.StopName == doc.data().stop_name)   // if the document there has the correct information
+                        {
+                            console.log("found one in document number " + i);
+                            list.push(db.collection('data_distinct').doc(i));
+                        }
+                            
+                    }
+                    
+                    
+                }
+                
+                var toReturn = "The following routes go to " + agent.parameters.StopName;
+                for(i = 0; i < list.count(); i++)
+                {
+                    toReturn = toReturn + " " + list[i].route_id;
+                }
+              	agent.add(toReturn);
+                //var stop = doc.data().stop_name;
+                //console.log('Most recent doc', stop, agent);
+                //agent.add("Most recent stop: " + stop);
             }
             // return Promise.resolve('Read complete');
         }).catch(() => {

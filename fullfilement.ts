@@ -155,6 +155,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function getRouteID_noContext(agent) {
         console.log("you've entered the getRouteID_noContext");
         var doc = db.collection('data_distinct').doc('0');
+        var targetStop = agent.parameters.StopName;
         return doc.get().then(doc => {
             if (!doc.exists) {
                 console.log('getRouteID_noContext ' + agent);
@@ -169,25 +170,39 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 var list = [];
                 // iterate through the documents
                 console.log("created a list");
-                for(var i = 0; i < db.collection('data_distinct').count(); i++)
-                {
-                  console.log("entered the for loop");
-                    doc = db.collection('data_distinct').doc(i);
-                    if(doc.exists)  // if the document exists
-                    {
-                        if(agent.parameters.StopName == doc.data().stop_name)   // if the document there has the correct information
-                        {
-                            console.log("found one in document number " + i);
-                            list.push(db.collection('data_distinct').doc(i));
-                        }
+                // console.log("there are " + db.collection('data_distinct').count() + " items in data_distinct");
+                // for(var i = 0; i < db.collection('data_distinct').count(); i++)
+                // {
+                //   console.log("entered the for loop");
+                //     doc = db.collection('data_distinct').doc(i);
+                //     if(doc.exists)  // if the document exists
+                //     {
+                //         if(agent.parameters.StopName == doc.data().stop_name)   // if the document there has the correct information
+                //         {
+                //             console.log("found one in document number " + i);
+                //             list.push(db.collection('data_distinct').doc(i));
+                //         }
                             
-                    }
+                //     }
                     
                     
-                }
+                // }
+
+                db.collection("data_distinct").where("stop_name", "==", targetStop)
+                .get()
+                .then(function(querySnapshot) {
+                    querySnapshot.forEach(function(doc) {
+                        // doc.data() is never undefined for query doc snapshots
+                        console.log(doc.id, " => ", doc.data());
+                        // list.push(doc.id);
+                    });
+                })
+                .catch(function(error) {
+                    console.log("Error getting documents: ", error);
+                });
                 
                 var toReturn = "The following routes go to " + agent.parameters.StopName;
-                for(i = 0; i < list.count(); i++)
+                for(var i = 0; i < list.count(); i++)
                 {
                     toReturn = toReturn + " " + list[i].route_id;
                 }

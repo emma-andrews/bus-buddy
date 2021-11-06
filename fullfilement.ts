@@ -99,20 +99,21 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     function getEstimatedETA(agent) {
-
+        var contexts = 
     }
 
     function getRouteID_context(agent) {
-        var contexts = request.body.queryResult.outputContexts;
+        //var contexts = request.body.queryResult.outputContexts;
+        var contexts = agent.getContext('closeststopname');
         var closest;
         var routes = [];
         var doc = db.collection('data_distinct').doc('0');
         //console.log("ctx: " + contexts[0].name);
-        console.log("CTX ClosestStop: " + contexts[1].parameters.ClosestStop);
-        
+        console.log("CTX ClosestStop: " + contexts.parameters.ClosestStop);
+
         //console.log("ctx2: " + ctx);
         //console.log("1. " + ctx['closeststopname'].parameters);
-        for (var j = 0; j < contexts.count(); j++) {
+        /*for (var j = 0; j < contexts.count(); j++) {
             if (contexts[j].includes("closeststopname")) {
                 closest = contexts[j];
                 console.log("closest: " + closest);
@@ -128,6 +129,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 }
             }
         }
+        */
         return doc.get().then(doc => {
             if (!doc.exists) {
                 console.log('getRouteID_context ' + agent);
@@ -136,11 +138,11 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 var stop = doc.data().stop_name;
                 console.log('Most recent doc', stop, agent);
 
-                var ctxClosest = contexts[1].parameters.ClosestStop;
-                var textresponse = request.body.queryResult.fulfillmentText + " ";
-                textresponse = textresponse.replace("$StopName", ctxClosest);
-                agent.add(textresponse);
-                //agent.add("Most recent stop: " + stop);
+                //var ctxClosest = contexts[1].parameters.ClosestStop;
+                //var textresponse = request.body.queryResult.fulfillmentText + " ";
+                //textresponse = textresponse.replace("context.closeststopname", ctxClosest);
+                //agent.add(textresponse);
+                agent.add("The stop at " + contexts.parameters.ClosestStop + " is served by routes...");
             }
             // return Promise.resolve('Read complete');
         }).catch(() => {

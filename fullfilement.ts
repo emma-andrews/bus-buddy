@@ -88,7 +88,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         //console.log("oContexts: " + oContexts[0].name);
         var ctx = agent.contexts;
-        console.log("CURRENT CONTEXT: " + ctx);
+        console.log("CURRENT CONTEXTS: " + ctx);
 
         return doc.get().then(doc => {
             if (!doc.exists) {
@@ -98,7 +98,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 var s = doc.data().stop_name;
                 textresponse = textresponse.replace(PLACEHOLDER, s);
                 console.log('Manually setting The HUB as closest stop', s, PLACEHOLDER, textresponse);
-                agent.add(textresponse);
+                //agent.add(textresponse);
             }
             // return Promise.resolve('Read complete');
         }).catch(() => {
@@ -113,25 +113,21 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         var routes = [];
         var doc = db.collection('data_distinct').doc('0');
         console.log("ctx: " + contexts[0].name);
+        console.log("ctx1 params: " + contexts[1].parameters.ClosestStop);
         var ctx = agent.contexts;
         console.log("ctx2: " + ctx);
         console.log("1. " + ctx['closeststopname'].parameters);
-        for (var j = 0; j < contexts.count(); j++)
-        {
-            if (contexts[j].includes("closeststopname"))
-            {
+        for (var j = 0; j < contexts.count(); j++) {
+            if (contexts[j].includes("closeststopname")) {
                 closest = contexts[j];
                 console.log("closest: " + closest);
             }
         }
-        
-        for (var i = 0; i < db.collection('data_distinct').count(); i++)
-        {
+
+        for (var i = 0; i < db.collection('data_distinct').count(); i++) {
             doc = db.collection('data_distinct').doc(i);
-            if (doc.exists)
-            {
-                if (closest === doc.data().stop_name)
-                {
+            if (doc.exists) {
+                if (closest === doc.data().stop_name) {
                     routes.push(doc.data().route_id);
                     console.log("route: " + doc.data().route_id);
                 }
@@ -141,7 +137,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             if (!doc.exists) {
                 console.log('getRouteID_context ' + agent);
                 agent.add('No data found in the database!');
-            } else {    
+            } else {
                 var stop = doc.data().stop_name;
                 console.log('Most recent doc', stop, agent);
                 agent.add("Most recent stop: " + stop);
@@ -155,31 +151,34 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
     function getRouteID_noContext(agent) {
-        let doc = db.collection('data_distinct').doc('0');
         console.log("you've entered the getRouteID_noContext");
+        var doc = db.collection('data_distinct').doc('0');
+        console.log("successfully set doc to ");
+        console.log(doc.data().stop_name);
+        console.log("I just logged the stop name");
+
         // create a list of documents that match the specific bus stop name
         let list = [];
         // iterate through the documents
-        for(let i = 0; i < db.collection('data_distinct').count(); i++)
-        {
+        for (let i = 0; i < db.collection('data_distinct').count(); i++) {
             doc = db.collection('data_distinct').doc(i);
-            if(doc.exists)  // if the document exists
+            if (doc.exists)  // if the document exists
             {
-                if(agent.parameters.StopName == doc.data().stop_name)   // if the document there has the correct information
+                if (agent.parameters.StopName == doc.data().stop_name)   // if the document there has the correct information
                 {
                     console.log("found one in document number " + i);
                     list.push(db.collection('data_distinct').doc(i));
                 }
-                    
+
             }
-            
-            
+
+
         }
         return doc.get().then(doc => {
             if (!doc.exists) {
                 console.log('getRouteID_noContext ' + agent);
                 agent.add('No data found in the database!');
-            } else {    
+            } else {
                 var stop = doc.data().stop_name;
                 console.log('Most recent doc', stop, agent);
                 agent.add("Most recent stop: " + stop);

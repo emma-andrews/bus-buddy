@@ -106,16 +106,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         var contexts = agent.getContexts('closeststopname');
         var closest = contexts.parameters.ClosestStop;
         var routes = [];
-        var selectedDoc = db.collection('data_distinct').doc('0');
 
-        const query = db.collection('data_distinct');
-        query.get().then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                if (doc.data().stop_name === closest)
-                {
-                    routes.push(doc.data().route_id);
-                }
-            })
+        db.collection("data_distinct").where("stop_name", "==", closest).get().then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+                // doc.data() is never undefined for query doc snapshots
+                console.log(doc.id, " => ", doc.data());
+                routes.push(doc.data().route_id);
+            });
+        })
+        .catch(function(error) {
+            console.log("Error getting documents: ", error);
         });
 
         agent.setContext({

@@ -135,7 +135,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function getRouteID_context(agent) {
         var contexts = agent.getContext('closeststopname');
         var closest = contexts.parameters.ClosestStop;
-        var doc = db.collection('stop_name').doc(closest);
+        var doc = db.collection('test_stop_names').doc(closest);
 
         return doc.get().then(doc => {
             if (!doc.exists) {
@@ -165,7 +165,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         console.log("you've entered the getRouteID_noContext");
         //var doc = db.collection('data_distinct').doc('0');
         var targetStop = agent.parameters.StopName;
-        var doc = db.collection('stop_name').doc(targetStop);
+        var doc = db.collection('test_stop_names').doc(targetStop);
         console.log("target stop is " + targetStop);
         return doc.get().then(doc => {
             if (!doc.exists) {

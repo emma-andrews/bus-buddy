@@ -3,7 +3,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 import os
 
-DB_CONF_PATH = r"C:\Users\ccdre\OneDrive\Get Things Done\Courses\CIS6930 - Spoken Dialogue Systems\bus-buddy\db_config.json"
+DB_CONF_PATH = r"bus-buddy\db_config.json"
 cred = credentials.Certificate(DB_CONF_PATH)
 firebase_admin.initialize_app(cred)
 
@@ -14,45 +14,67 @@ client = firestore.client()
 #         print(u"{} => {}".format(doc.id, doc.to_dict()))
 
 
-def loadFromTxt(p):
+def loadFromJson(p):
+    import json
 
     print("\n\n\n-----------------------------------------")
     print("loading:", p)
     with open(p) as f:
-        import csv
-
-        collection_name = os.path.splitext(os.path.basename(f.name))[0]
-        print("creating collection:", collection_name)
-
+        data = json.load(f)
+        # print(data)
+        collection_name = "test_stop_names"
         db = client.collection(collection_name)
-        reader = csv.DictReader(f)
-        # reader = csv.reader(f)
-        row_counter = 0
-        for row in reader:
-            print(row_counter, row)
-            doc = db.document(str(row_counter))
-            doc.set(row)
-            row_counter = row_counter + 1
+        for i in data:
+            doc = db.document(str(i["stop_name"]))
+            doc.set(i)
+            print(i["stop_name"])
 
 
-""""
-# agency.txt
-# calendar.txt
-# calendar_dates.txt
-# feed_info.txt
-# routes.txt
-shapes.txt   ???????
-# stops.txt
-stop_times.txt ?????
-# trips.txt
-"""
-# dir = ".\\V02Fall2021google_transit\\"
-# files_path = [os.path.abspath(os.path.join(dir, x)) for x in os.listdir(dir)]
-dir = ".\\csvs\\"
-files_path = [
-    # dir + "data_distinct.csv",
-    "C:\Users\ccdre\OneDrive\Get Things Done\Courses\CIS6930 - Spoken Dialogue Systems\bus-buddy\csvs\data_distinct.csv"
-]
-for i in files_path:
-    loadFromTxt(i)
-    print(os.path.basename(i))
+loadFromJson(r"bus-buddy\csvs\stop_name.json")
+
+
+exit(1)
+
+
+# def loadFromTxt(p):
+
+#     print("\n\n\n-----------------------------------------")
+#     print("loading:", p)
+#     with open(p) as f:
+#         import csv
+
+#         collection_name = os.path.splitext(os.path.basename(f.name))[0]
+#         print("creating collection:", collection_name)
+
+#         db = client.collection(collection_name)
+#         reader = csv.DictReader(f)
+#         # reader = csv.reader(f)
+#         row_counter = 0
+#         for row in reader:
+#             print(row_counter, row)
+#             doc = db.document(str(row_counter))
+#             doc.set(row)
+#             row_counter = row_counter + 1
+
+
+# """"
+# # agency.txt
+# # calendar.txt
+# # calendar_dates.txt
+# # feed_info.txt
+# # routes.txt
+# shapes.txt   ???????
+# # stops.txt
+# stop_times.txt ?????
+# # trips.txt
+# """
+# # dir = ".\\V02Fall2021google_transit\\"
+# # files_path = [os.path.abspath(os.path.join(dir, x)) for x in os.listdir(dir)]
+# dir = ".\\csvs\\"
+# files_path = [
+#     # dir + "data_distinct.csv",
+#     "C:\Users\ccdre\OneDrive\Get Things Done\Courses\CIS6930 - Spoken Dialogue Systems\bus-buddy\csvs\data_distinct.csv"
+# ]
+# for i in files_path:
+#     loadFromTxt(i)
+#     print(os.path.basename(i))

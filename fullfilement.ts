@@ -135,31 +135,29 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function getRouteID_context(agent) {
         var contexts = agent.getContexts('closeststopname');
         var closest = contexts.parameters.ClosestStop;
-        var routes = [];
+        var doc = db.collection('stop_name').doc(closest);
 
-        db.collection("data_distinct").where("stop_name", "==", closest).get().then(function(querySnapshot) {
-            querySnapshot.forEach(function(doc) {
-                // doc.data() is never undefined for query doc snapshots
-                console.log(doc.id, " => ", doc.data());
-                routes.push(doc.data().route_id);
-            });
-        })
-        .catch(function(error) {
-            console.log("Error getting documents: ", error);
-        });
+        return doc.get().then(doc => {
+            if (!doc.exists) {
+                console.log('getRouteID_context ' + agent);
+                agent.add('No data found in the database!');
+            } else {
+                var routes = doc.data().route_id;
 
-        agent.setContext({
-            name: 'busrouteidlist',
-            lifespan: 1,
-            parameters: {
-                routes: routes
+                agent.setContext({
+                    name: 'busrouteidlist',
+                    lifespan: 1,
+                    parameters: {
+                        routes: routes
+                    }
+                });
+        
+                agent.add("The stop at " + closest + " is served by routes " + routes.join(", "));
             }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
         });
-
-        var routesStr = "";
-        routes.forEach(route => routesStr = routesStr + route);
-
-        agent.add("The stop at " + contexts.parameters.ClosestStop + " is served by routes " + routesStr);
     }
 
     // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"

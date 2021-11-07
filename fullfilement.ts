@@ -165,8 +165,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
     function getRouteID_noContext(agent) {
         console.log("you've entered the getRouteID_noContext");
-        var doc = db.collection('data_distinct').doc('0');
+        //var doc = db.collection('data_distinct').doc('0');
         var targetStop = agent.parameters.StopName;
+        var doc = db.collection('stop_name').doc(targetStop);
         console.log("target stop is " + targetStop);
         return doc.get().then(doc => {
             if (!doc.exists) {
@@ -174,14 +175,22 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 agent.add('No data found in the database!');
             } else {
                 // attempt to see if it works
-                console.log("successfully set doc to ");
-                console.log(doc.data().stop_name);
-                console.log("I just logged the stop name");
+                console.log("successfully set doc. Route IDs are ");
+                console.log(doc.data().route_id);
+                console.log("I just logged the route ID list");
+
+                // var toReturn = "The following routes go to ";
+                // for(var i = 0; i < list.count(); i++)
+                // {
+                //     toReturn = toReturn + " " + list[i].route_id;
+                // }
+                // agent.add(toReturn);
+                agent.add("The following routes go to " + targetStop + " " + doc.data().route_id.join(", "));
                 
                 // create a list of documents that match the specific bus stop name
-                var list = [];
+                //var list = [];
                 // iterate through the documents
-                console.log("created a list");
+                //console.log("created a list");
                 // console.log("there are " + db.collection('data_distinct').count() + " items in data_distinct");
                 // for(var i = 0; i < db.collection('data_distinct').count(); i++)
                 // {
@@ -200,24 +209,27 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     
                 // }
 
-                db.collection("data_distinct").where("stop_name", "==", targetStop).get().then(function(querySnapshot) {
-                    querySnapshot.forEach(function(doc) {
-                        // doc.data() is never undefined for query doc snapshots
-                        console.log(doc.id, " => ", doc.data());
-                        console.log("the doc.id is " + doc.id + " and the route is " + doc.data().route_id);
-                        // list.push(doc.id);
-                    });
-                })
-                .catch(function(error) {
-                    console.log("Error getting documents: ", error);
-                });
+                // db.collection("data_distinct").where("stop_name", "==", targetStop).get().then(function(querySnapshot) {
+                //     querySnapshot.forEach(function(doc) {
+                //         // doc.data() is never undefined for query doc snapshots
+                //         console.log(doc.id, " => ", doc.data());
+                //         console.log("the doc.id is " + doc.id + " and the route is " + doc.data().route_id);
+                //         // list.push(doc.id);
+                //         list.push(doc.data().route_id);
+                //     });
+                // })
+                // .catch(function(error) {
+                //     console.log("Error getting documents: ", error);
+                // });
                 
-                var toReturn = "The following routes go to " + targetStop;
+                var toReturn = "The following routes go to ";
                 // for(var i = 0; i < list.count(); i++)
                 // {
                 //     toReturn = toReturn + " " + list[i].route_id;
                 // }
-              	agent.add(toReturn);
+                agent.add(toReturn);
+                
+              	//agent.add(toReturn);
                 //var stop = doc.data().stop_name;
                 //console.log('Most recent doc', stop, agent);
                 //agent.add("Most recent stop: " + stop);

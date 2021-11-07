@@ -133,7 +133,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     function getRouteID_context(agent) {
-        var contexts = agent.getContexts('closeststopname');
+        var contexts = agent.getContext('closeststopname');
         var closest = contexts.parameters.ClosestStop;
         var doc = db.collection('stop_name').doc(closest);
 

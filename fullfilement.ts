@@ -99,7 +99,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     function getEstimatedETA_context_noRoute(agent) {
-        var contexts = agent.getContexts('closeststopname');
+        var contexts = agent.getContext('closeststopname');
         var soonestBusRouteID;
         var timePeriod;
 
@@ -108,7 +108,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     function getEstimatedETA_context_route(agent) {
-        var contexts = agent.getContexts('closeststopname');
+        var contexts = agent.getContext('closeststopname');
         var timePeriod;
 
         agent.add('The next ' + agent.parameters.busrouteid + ' arrives at ' + contexts.parameter.ClosestStop + ' in about ' + timePeriod + ' minutes.');

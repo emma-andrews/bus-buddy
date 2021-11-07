@@ -222,12 +222,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 //     console.log("Error getting documents: ", error);
                 // });
                 
-                var toReturn = "The following routes go to ";
+                //var toReturn = "The following routes go to ";
                 // for(var i = 0; i < list.count(); i++)
                 // {
                 //     toReturn = toReturn + " " + list[i].route_id;
                 // }
-                agent.add(toReturn);
+                //agent.add(toReturn);
                 
               	//agent.add(toReturn);
                 //var stop = doc.data().stop_name;

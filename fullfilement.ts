@@ -91,7 +91,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 console.log('Manually setting The HUB as closest stop', s, PLACEHOLDER, textresponse);
                 agent.add(textresponse);
             }
-            // return Promise.resolve('Read complete');
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
             agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
@@ -163,7 +162,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
     function getRouteID_noContext(agent) {
         console.log("you've entered the getRouteID_noContext");
-        //var doc = db.collection('data_distinct').doc('0');
         var targetStop = agent.parameters.StopName;
         var doc = db.collection('test_stop_names').doc(targetStop);
         console.log("target stop is " + targetStop);
@@ -177,62 +175,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 console.log(doc.data().route_id);
                 console.log("I just logged the route ID list");
 
-                // var toReturn = "The following routes go to ";
-                // for(var i = 0; i < list.count(); i++)
-                // {
-                //     toReturn = toReturn + " " + list[i].route_id;
-                // }
-                // agent.add(toReturn);
                 agent.add("The following routes go to " + targetStop + " " + doc.data().route_id.join(", "));
-                
-                // create a list of documents that match the specific bus stop name
-                //var list = [];
-                // iterate through the documents
-                //console.log("created a list");
-                // console.log("there are " + db.collection('data_distinct').count() + " items in data_distinct");
-                // for(var i = 0; i < db.collection('data_distinct').count(); i++)
-                // {
-                //   console.log("entered the for loop");
-                //     doc = db.collection('data_distinct').doc(i);
-                //     if(doc.exists)  // if the document exists
-                //     {
-                //         if(agent.parameters.StopName == doc.data().stop_name)   // if the document there has the correct information
-                //         {
-                //             console.log("found one in document number " + i);
-                //             list.push(db.collection('data_distinct').doc(i));
-                //         }
-                            
-                //     }
-                    
-                    
-                // }
-
-                // db.collection("data_distinct").where("stop_name", "==", targetStop).get().then(function(querySnapshot) {
-                //     querySnapshot.forEach(function(doc) {
-                //         // doc.data() is never undefined for query doc snapshots
-                //         console.log(doc.id, " => ", doc.data());
-                //         console.log("the doc.id is " + doc.id + " and the route is " + doc.data().route_id);
-                //         // list.push(doc.id);
-                //         list.push(doc.data().route_id);
-                //     });
-                // })
-                // .catch(function(error) {
-                //     console.log("Error getting documents: ", error);
-                // });
-                
-                //var toReturn = "The following routes go to ";
-                // for(var i = 0; i < list.count(); i++)
-                // {
-                //     toReturn = toReturn + " " + list[i].route_id;
-                // }
-                //agent.add(toReturn);
-                
-              	//agent.add(toReturn);
-                //var stop = doc.data().stop_name;
-                //console.log('Most recent doc', stop, agent);
-                //agent.add("Most recent stop: " + stop);
             }
-            // return Promise.resolve('Read complete');
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
             agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
@@ -243,149 +187,40 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         return a1.filter(function (n) { return a2.indexOf(n) !== -1; });
     }
 
-    
-    function readFirstDoc(docDep, agent, rDest) {
-        return docDep.get().then(docDep => {
-            if (!docDep.exists) {
-                console.log('getSomewhere Dep' + agent);
-                agent.add('No data found in the database!');
-            } else {
-
-                console.log("got here 5");
-                var rDep = docDep.data().route_id;
-                console.log("rDep: " + rDep.join(", "));
-
-                //console.log("r2: " + rDep);
-
-                //agent.setContext({
-                //    name: 'busrouteidlist',
-                //    lifespan: 1,
-                //    parameters: {
-                //        routes: routes
-                //    }
-                //});
-
-                var routesInCommon = getArraysIntersection(rDest, rDep);
-
-                agent.add("I hear you want to get to " + agent.parameters.DestinationStopName + " from " + agent.parameters.DepartureStopName + ". You can get there by taking routes " + routesInCommon.join(", "));
-            }
-        }).catch(() => {
-            agent.add('Error reading entry from the Firestore database.');
-            agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
-        });
-    }
-
     // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
     function getSomewhere(agent) {
-        //console.log(request.body.queryResult.fulfillmentText);
-        //console.log("-------------------------");
-        //console.log(request.body.queryResult.outputContexts);
-        //console.log("++++++++++++++++++++++++");
-        //agent.add('1111');
-
         var destinationStop = agent.parameters.DestinationStopName;
         console.log("got here 0");
-        var departureStop = agent.parameters.DestinationStopName;
+        var departureStop = agent.parameters.DepartureStopName;
         console.log("got here 1");
         var docDest = db.collection('test_stop_names').doc(destinationStop);
         console.log("got here 2");
         var docDep = db.collection('test_stop_names').doc(departureStop);
         console.log("got here 3");
 
-        return docDest.get().then(docDest => {
-            if (!docDest.exists) {
-                console.log('getSomewhere Dest ' + agent);
+        return db.getAll(docDest, docDep).then(docs => {
+            if (!(docs[0].exists && docs[1].exists)) {
+                console.log('getSomewhere' + agent);
                 agent.add('No data found in the database!');
-            } else {
-                console.log("got here 4");              
-                var rDest = docDest.data().route_id;
-                console.log("rDest: " + rDest.join(", "));
-                readFirstDoc(docDep, agent, rDest);
-                //agent.setContext({
-                //    name: 'busrouteidlist',
-                //    lifespan: 1,
-                //    parameters: {
-                //        routes: routes
-                //    }
-                //});
+            } else {   
+                console.log("got here 5");
+                var rDep = docs[1].data().route_id;
+                var rDest = docs[0].data().route_id;
 
-                //agent.add("I hear you want to get to" + destinationStop + " from " + departureStop + ". You can get there by taking routes {FIX}");
-         
+                console.log("rDep: " + rDep.join(", "));
+                console.log("rDest: " + rDest.join(", "));
+
+                var routesInCommon = getArraysIntersection(rDest, rDep);
+                console.log("common: " + routesInCommon.join(", "));
+
+                agent.add("I hear you want to get to " + agent.parameters.DestinationStopName + " from " + 
+                    agent.parameters.DepartureStopName + ". You can get there by taking routes " + routesInCommon.join(", "));
             }
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
             agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
         });
-
-        
-
-        // var contexts = request.body.queryResult.outputContexts;
-        // var closest;
-        // var routes = [];
-        // var doc = db.collection('data_distinct').doc('0');
-        // console.log("ctx: " + contexts[0].name);
-        // var ctx = agent.contexts;
-        // console.log("ctx2: " + ctx);
-        // console.log("1. " + ctx['closeststopname'].parameters);
-        // for (var j = 0; j < contexts.count(); j++) {
-        //     if (contexts[j].includes("closeststopname")) {
-        //         closest = contexts[j];
-        //         console.log("closest: " + closest);
-        //     }
-        // }
-
-        // for (var i = 0; i < db.collection('data_distinct').count(); i++) {
-        //     doc = db.collection('data_distinct').doc(i);
-        //     if (doc.exists) {
-        //         if (closest === doc.data().stop_name) {
-        //             routes.push(doc.data().route_id);
-        //             console.log("route: " + doc.data().route_id);
-        //         }
-        //     }
-        // }
-        // return doc.get().then(doc => {
-        //     if (!doc.exists) {
-        //         console.log('getRouteID_context ' + agent);
-        //         agent.add('No data found in the database!');
-        //     } else {
-        //         var stop = doc.data().stop_name;
-        //         console.log('Most recent doc', stop, agent);
-        //         agent.add("Most recent stop: " + stop);
-        //     }
-        //     // return Promise.resolve('Read complete');
-        // }).catch(() => {
-        //     agent.add('Error reading entry from the Firestore database.');
-        //     agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
-        // });
     }
-    // // Uncomment and edit to make your own intent handler
-    // // uncomment `intentMap.set('your intent name here', yourFunctionHandler);`
-    // // below to get this function to be run when a Dialogflow intent is matched
-    // function yourFunctionHandler(agent) {
-    //   agent.add(`This message is from Dialogflow's Cloud Functions for Firebase editor!`);
-    //   agent.add(new Card({
-    //       title: `Title: this is a card title`,
-    //       imageUrl: 'https://developers.google.com/actions/images/badges/XPM_BADGING_GoogleAssistant_VER.png',
-    //       text: `This is the body text of a card.  You can even use line\n  breaks and emoji! 💁`,
-    //       buttonText: 'This is a button',
-    //       buttonUrl: 'https://assistant.google.com/'
-    //     })
-    //   );
-    //   agent.add(new Suggestion(`Quick Reply`));
-    //   agent.add(new Suggestion(`Suggestion`));
-    //   agent.setContext({ name: 'weather', lifespan: 2, parameters: { city: 'Rome' }});
-    // }
-
-    // // Uncomment and edit to make your own Google Assistant intent handler
-    // // uncomment `intentMap.set('your intent name here', googleAssistantHandler);`
-    // // below to get this function to be run when a Dialogflow intent is matched
-    // function googleAssistantHandler(agent) {
-    //   let conv = agent.conv(); // Get Actions on Google library conv instance
-    //   conv.ask('Hello from the Actions on Google client library!') // Use Actions on Google library
-    //   agent.add(conv); // Add Actions on Google library responses to your agent's response
-    // }
-    // // See https://github.com/dialogflow/fulfillment-actions-library-nodejs
-    // // for a complete Dialogflow fulfillment library Actions on Google client library v2 integration sample
 
     // Run the proper function handler based on the matched Dialogflow intent name
     let intentMap = new Map();
@@ -395,6 +230,5 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('getRouteID-context', getRouteID_context);
     intentMap.set('getRouteID-noContext', getRouteID_noContext);
     intentMap.set('getSomewhere', getSomewhere);
-    // intentMap.set('your intent name here', googleAssistantHandler);
     agent.handleRequest(intentMap);
 });

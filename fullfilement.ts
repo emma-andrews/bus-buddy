@@ -239,13 +239,85 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         });
     }
 
+    function getArraysIntersection(a1, a2) {
+        return a1.filter(function (n) { return a2.indexOf(n) !== -1; });
+    }
+
+    
+    function readFirstDoc(docDep, agent, rDest) {
+        return docDep.get().then(docDep => {
+            if (!docDep.exists) {
+                console.log('getSomewhere Dep' + agent);
+                agent.add('No data found in the database!');
+            } else {
+
+                console.log("got here 5");
+                var rDep = docDep.data().route_id;
+                console.log("rDep: " + rDep.join(", "));
+
+                //console.log("r2: " + rDep);
+
+                //agent.setContext({
+                //    name: 'busrouteidlist',
+                //    lifespan: 1,
+                //    parameters: {
+                //        routes: routes
+                //    }
+                //});
+
+                var routesInCommon = getArraysIntersection(rDest, rDep);
+
+                agent.add("I hear you want to get to " + agent.parameters.DestinationStopName + " from " + agent.parameters.DepartureStopName + ". You can get there by taking routes " + routesInCommon.join(", "));
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
+        });
+    }
+
     // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
     function getSomewhere(agent) {
-        console.log(request.body.queryResult.fulfillmentText);
-        console.log("-------------------------");
-        console.log(request.body.queryResult.outputContexts);
-        console.log("++++++++++++++++++++++++");
-        agent.add('1111');
+        //console.log(request.body.queryResult.fulfillmentText);
+        //console.log("-------------------------");
+        //console.log(request.body.queryResult.outputContexts);
+        //console.log("++++++++++++++++++++++++");
+        //agent.add('1111');
+
+        var destinationStop = agent.parameters.DestinationStopName;
+        console.log("got here 0");
+        var departureStop = agent.parameters.DestinationStopName;
+        console.log("got here 1");
+        var docDest = db.collection('test_stop_names').doc(destinationStop);
+        console.log("got here 2");
+        var docDep = db.collection('test_stop_names').doc(departureStop);
+        console.log("got here 3");
+
+        return docDest.get().then(docDest => {
+            if (!docDest.exists) {
+                console.log('getSomewhere Dest ' + agent);
+                agent.add('No data found in the database!');
+            } else {
+                console.log("got here 4");              
+                var rDest = docDest.data().route_id;
+                console.log("rDest: " + rDest.join(", "));
+                readFirstDoc(docDep, agent, rDest);
+                //agent.setContext({
+                //    name: 'busrouteidlist',
+                //    lifespan: 1,
+                //    parameters: {
+                //        routes: routes
+                //    }
+                //});
+
+                //agent.add("I hear you want to get to" + destinationStop + " from " + departureStop + ". You can get there by taking routes {FIX}");
+         
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
+        });
+
+        
 
         // var contexts = request.body.queryResult.outputContexts;
         // var closest;

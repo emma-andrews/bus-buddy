@@ -91,6 +91,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 console.log('Manually setting The HUB as closest stop', s, PLACEHOLDER, textresponse);
                 agent.add(textresponse);
             }
+            // return Promise.resolve('Read complete');
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
             agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
@@ -98,7 +99,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     function getEstimatedETA_context_noRoute(agent) {
-        var contexts = agent.getContext('closeststopname');
+        var contexts = agent.getContexts('closeststopname');
         var soonestBusRouteID;
         var timePeriod;
 
@@ -107,11 +108,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     function getEstimatedETA_context_route(agent) {
-        var contexts = agent.getContext('closeststopname');
+        var contexts = agent.getContexts('closeststopname');
         var timePeriod;
 
         agent.add('The next ' + agent.parameters.busrouteid + ' arrives at ' + contexts.parameter.ClosestStop + ' in about ' + timePeriod + ' minutes.');
-
     }
 
     function getEstimatedETA_noContext_noRoute(agent) {
@@ -119,16 +119,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         var timePeriod;
 
         agent.add('The next ' + soonestBusRouteID + ' arrives at ' + agent.parameter.stopname + ' in about ' + timePeriod + ' minutes.');
-
-
     }
 
     function getEstimatedETA_noContext_route(agent) {
         var timePeriod;
 
         agent.add('The next ' + agent.parameters.busrouteid + ' arrives at ' + agent.parameter.stopname + ' in about ' + timePeriod + ' minutes.');
-
-
     }
 
     function getRouteID_context(agent) {
@@ -159,9 +155,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         });
     }
 
-    // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
+   // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
     function getRouteID_noContext(agent) {
         console.log("you've entered the getRouteID_noContext");
+        //var doc = db.collection('data_distinct').doc('0');
         var targetStop = agent.parameters.StopName;
         var doc = db.collection('test_stop_names').doc(targetStop);
         console.log("target stop is " + targetStop);
@@ -174,17 +171,94 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 console.log("successfully set doc. Route IDs are ");
                 console.log(doc.data().route_id);
                 console.log("I just logged the route ID list");
-
+              
                 agent.add("The following routes go to " + targetStop + " " + doc.data().route_id.join(", "));
+              
+              // create a list of documents that match the specific bus stop name
+                //var list = [];
+                // iterate through the documents
+                //console.log("created a list");
+                // console.log("there are " + db.collection('data_distinct').count() + " items in data_distinct");
+                // for(var i = 0; i < db.collection('data_distinct').count(); i++)
+                // {
+                //   console.log("entered the for loop");
+                //     doc = db.collection('data_distinct').doc(i);
+                //     if(doc.exists)  // if the document exists
+                //     {
+                //         if(agent.parameters.StopName == doc.data().stop_name)   // if the document there has the correct information
+                //         {
+                //             console.log("found one in document number " + i);
+                //             list.push(db.collection('data_distinct').doc(i));
+                //         }
+                            
+                //     }
+                    
+                    
+                // }
+
+                // db.collection("data_distinct").where("stop_name", "==", targetStop).get().then(function(querySnapshot) {
+                //     querySnapshot.forEach(function(doc) {
+                //         // doc.data() is never undefined for query doc snapshots
+                //         console.log(doc.id, " => ", doc.data());
+                //         console.log("the doc.id is " + doc.id + " and the route is " + doc.data().route_id);
+                //         // list.push(doc.id);
+                //         list.push(doc.data().route_id);
+                //     });
+                // })
+                // .catch(function(error) {
+                //     console.log("Error getting documents: ", error);
+                // });
+                
+                //var toReturn = "The following routes go to ";
+                // for(var i = 0; i < list.count(); i++)
+                // {
+                //     toReturn = toReturn + " " + list[i].route_id;
+                // }
+                //agent.add(toReturn);
+                
+              	//agent.add(toReturn);
+                //var stop = doc.data().stop_name;
+                //console.log('Most recent doc', stop, agent);
+                //agent.add("Most recent stop: " + stop);
             }
+            // return Promise.resolve('Read complete');
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
             agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
         });
     }
-
-    function getArraysIntersection(a1, a2) {
+  
+  function getArraysIntersection(a1, a2) {
         return a1.filter(function (n) { return a2.indexOf(n) !== -1; });
+    }
+  
+ function readFirstDoc(docDep, agent, rDest, routesInCommon) {
+        return docDep.get().then(docDep => {
+            if (!docDep.exists) {
+                console.log('getSomewhere Dep' + agent);
+                agent.add('No data found in the database!');
+            } else {
+
+                console.log("got here 5");
+                var rDep = docDep.data().route_id;
+                console.log("rDep: " + rDep.join(", "));
+              	routesInCommon.push(getArraysIntersection(rDep, rDest));
+              console.log("in: " + routesInCommon);
+
+                //console.log("r2: " + rDep);
+
+                //agent.setContext({
+                //    name: 'busrouteidlist',
+                //    lifespan: 1,
+                //    parameters: {
+                //        routes: routes
+                //    }
+                //});
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
+        });
     }
 
     // returns the route IDs when someone says a specific bus stop name like "Which bus routes go to the Hub?"
@@ -202,48 +276,51 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             if (!(docs[0].exists && docs[1].exists)) {
                 console.log('getSomewhere' + agent);
                 agent.add('No data found in the database!');
-            } else {   
+            } else {
+                
                 console.log("got here 5");
                 var rDep = docs[1].data().route_id;
-                var rDest = docs[0].data().route_id;
-
+                var rDest = docs[0].data().route_id;        
                 console.log("rDep: " + rDep.join(", "));
                 console.log("rDest: " + rDest.join(", "));
-
                 var routesInCommon = getArraysIntersection(rDest, rDep);
                 console.log("common: " + routesInCommon.join(", "));
-
-                // determine length of the routes list
-                var numberOfRoutes = routesInCommon.length;
-
-                var maxSizeToSpeak = 5;
-                // if the number of routes is 0
-                if(numberOfRoutes == 0)
-                {
-                    agent.add("It looks like there aren't actually any routes in the RTS system that could get you from " +
-                    agent.parameters.DepartureStopName + " to " + agent.parameters.DestinationStopName);
-                }
-                // if the number of routes is more than 5
-                if(numberOfRoutes > maxSizeToSpeak)
-                {
-                    agent.add("Many routes can get you from  " + agent.parameters.DepartureStopName + " to " + 
-                    agent.parameters.DestinationStopName + ". If you want the full list, say full list. " +
-                    "Here are the first couple: " + routesInCommon.slice(0,maxSizeToSpeak).join(", "));
-                    // Is there a way to listen for the user in here?
-
-                }
-                else
-                {
-                    agent.add("I hear you want to get to " + agent.parameters.DestinationStopName + " from " + 
+                agent.add("I hear you want to get to " + agent.parameters.DestinationStopName + " from " + 
                     agent.parameters.DepartureStopName + ". You can get there by taking routes " + routesInCommon.join(", "));
-                }
-                
             }
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
             agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
         });
     }
+    // // Uncomment and edit to make your own intent handler
+    // // uncomment `intentMap.set('your intent name here', yourFunctionHandler);`
+    // // below to get this function to be run when a Dialogflow intent is matched
+    // function yourFunctionHandler(agent) {
+    //   agent.add(`This message is from Dialogflow's Cloud Functions for Firebase editor!`);
+    //   agent.add(new Card({
+    //       title: `Title: this is a card title`,
+    //       imageUrl: 'https://developers.google.com/actions/images/badges/XPM_BADGING_GoogleAssistant_VER.png',
+    //       text: `This is the body text of a card.  You can even use line\n  breaks and emoji! 💁`,
+    //       buttonText: 'This is a button',
+    //       buttonUrl: 'https://assistant.google.com/'
+    //     })
+    //   );
+    //   agent.add(new Suggestion(`Quick Reply`));
+    //   agent.add(new Suggestion(`Suggestion`));
+    //   agent.setContext({ name: 'weather', lifespan: 2, parameters: { city: 'Rome' }});
+    // }
+
+    // // Uncomment and edit to make your own Google Assistant intent handler
+    // // uncomment `intentMap.set('your intent name here', googleAssistantHandler);`
+    // // below to get this function to be run when a Dialogflow intent is matched
+    // function googleAssistantHandler(agent) {
+    //   let conv = agent.conv(); // Get Actions on Google library conv instance
+    //   conv.ask('Hello from the Actions on Google client library!') // Use Actions on Google library
+    //   agent.add(conv); // Add Actions on Google library responses to your agent's response
+    // }
+    // // See https://github.com/dialogflow/fulfillment-actions-library-nodejs
+    // // for a complete Dialogflow fulfillment library Actions on Google client library v2 integration sample
 
     // Run the proper function handler based on the matched Dialogflow intent name
     let intentMap = new Map();
@@ -253,5 +330,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('getRouteID-context', getRouteID_context);
     intentMap.set('getRouteID-noContext', getRouteID_noContext);
     intentMap.set('getSomewhere', getSomewhere);
+    // intentMap.set('your intent name here', googleAssistantHandler);
     agent.handleRequest(intentMap);
 });

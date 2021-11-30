@@ -62,8 +62,8 @@ for i in range(len(d)):
             d2[k].sort()
             entry['route_id_times'].append(d2[k])
 
-with open('stop_name_time.json', 'w', encoding='utf-8') as f:
+with open('../csvs/stop_name_time.json', 'w', encoding='utf-8') as f:
     json.dump(d, f, ensure_ascii=False, indent=4)
 
-with open('stop_name_time_noformat.json', 'w', encoding='utf-8') as f:
+with open('../csvs/stop_name_time_noformat.json', 'w', encoding='utf-8') as f:
     json.dump(d, f)

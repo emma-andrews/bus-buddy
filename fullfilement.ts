@@ -77,7 +77,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }	// end of fillSlots function
 
     //should be good for first RR
-    function nameClosestStop(agent) {
+    function nameClosestStop_context(agent) {
         //db.collection('stops').doc('392') is location of The Hub data
         const doc = db.collection('stops').doc('392');
 
@@ -85,11 +85,36 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             if (!doc.exists) {
                 agent.add('No data found in the database!');
             } else {
-                var textresponse = request.body.queryResult.fulfillmentText + " ";
-                var s = doc.data().stop_name;
-                textresponse = textresponse.replace(PLACEHOLDER, s);
-                console.log('Manually setting The HUB as closest stop', s, PLACEHOLDER, textresponse);
-                agent.add(textresponse);
+                //var textresponse = request.body.queryResult.fulfillmentText + " ";
+                //var s = doc.data().stop_name;
+                //textresponse = textresponse.replace(PLACEHOLDER, s);
+                //console.log('Manually setting The HUB as closest stop', s, PLACEHOLDER, textresponse);
+                var stopDesciption = doc.data().stop_desc;
+
+                console.log('Manually setting The HUB as closest stop');
+                agent.add('The closest stop to you right now is at the HUB. It is located at ' + stopDesciption);
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
+        });
+    }
+
+    function nameClosestStop_noContext(agent) {
+        //db.collection('stops').doc('392') is location of The Hub data
+        //const doc = db.collection('stops').doc('392');
+
+        var givenStop = agent.parameters.StopName;
+        console.log("Given stop is: " + givenStop);
+        var doc = db.collection('test_stop_names').doc(givenStop);
+
+        return doc.get().then(doc => {
+            if (!doc.exists) {
+                agent.add('Unfortunately it does not seem like there is an RTS bus stop at that location. Is there anything else I can help you with?');
+            } else {
+                var stopDescription = doc.data().stop_desc;              
+                console.log();
+                agent.add('The nearest stop to ' + givenStop + ' is at' + stopDescription);
             }
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
@@ -249,7 +274,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     let intentMap = new Map();
     intentMap.set('Default Welcome Intent', welcome);
     intentMap.set('Default Fallback Intent', fallback);
-    intentMap.set('getClosestStopName', nameClosestStop);
+    intentMap.set('getEstimatedETA_context_noRoute', getEstimatedETA_context_noRoute);
+    intentMap.set('getEstimatedETA_context_route', getEstimatedETA_context_route);
+    intentMap.set('getEstimatedETA_noContext_noRoute', getEstimatedETA_noContext_noRoute);
+    intentMap.set('getEstimatedETA_noContext_route', getEstimatedETA_noContext_route);
+    intentMap.set('getClosestStopName-context', nameClosestStop_context);
+    intentMap.set('getClosestStopName-noContext', nameClosestStop_noContext);
     intentMap.set('getRouteID-context', getRouteID_context);
     intentMap.set('getRouteID-noContext', getRouteID_noContext);
     intentMap.set('getSomewhere', getSomewhere);

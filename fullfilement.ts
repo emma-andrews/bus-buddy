@@ -121,7 +121,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             } else {
                 var stopDescription = doc.data().stop_desc;              
                 console.log();
-                agent.add('The nearest stop to ' + givenStop + ' is at' + stopDescription);
+                agent.add('The nearest stop to ' + givenStop + ' is at ' + stopDescription);
             }
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
@@ -471,7 +471,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 if(numberOfRoutes > maxSizeToSpeak)
                 {
                     agent.add("Many routes can get you from  " + agent.parameters.DepartureStopName + " to " + 
-                    agent.parameters.DestinationStopName + ". If you want the full list, say full list. " +
+                    agent.parameters.DestinationStopName + ". If you want the next five, say next five. " +
                     "Here are the first couple: " + routesInCommon.slice(0,maxSizeToSpeak).join(", "));
                     // Is there a way to listen for the user in here?
 

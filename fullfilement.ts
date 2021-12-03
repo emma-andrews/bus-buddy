@@ -93,6 +93,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 console.log('Manually setting The HUB as closest stop');
                 agent.add('The closest stop to you right now is at the HUB. It is located at ' + stopDesciption);
+                agent.setContext({
+                    name: 'ClosestStopName',
+                    lifespan: 1,
+                    parameters: {
+                        ClosestStop: 'The HUB'
+                    }
+                });
             }
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
@@ -123,37 +130,249 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     function getEstimatedETA_context_noRoute(agent) {
+        var timePeriod = -1;
         var contexts = agent.getContext('closeststopname');
-        var soonestBusRouteID;
-        var timePeriod;
+        var stop = contexts.parameters.ClosestStop;
+        var doc = db.collection('test_stop_times').doc(stop);
 
-        agent.add('The next ' + soonestBusRouteID + ' arrives at ' + contexts.parameter.ClosestStop + ' in about ' + timePeriod + ' minutes.');
+        return doc.get().then(doc => {
+            if (!doc.exists) {
+                agent.add('I\'m sorry, I can\'t seem to find a stop at ' + stop + '.');
+            } else {
+                var routes = doc.data().route_id;
+                var route_times = [];
 
+                for (let i = 0; i < routes.length; i++)
+                {
+                    var times = doc.data()[routes[i]];
+                    var date = new Date();
+
+                    // Locale time is UTC, EST is UTC - 5
+                    date.setHours(date.getHours() - 5);
+                    var curTime = date.toLocaleTimeString('en-us', {hour12: false});
+
+                    for (let j = 0; j < times.length; j++) {
+                        // Find first instance where it is less than
+                        if (curTime < times[j]) {
+                            var start = new Date("01/01/2021 " + curTime);
+                            var end = new Date("01/01/2021 " + times[j]);
+
+                            var startM = (start.getHours() * 60) + start.getMinutes();
+                            var endM = (end.getHours() * 60) + end.getMinutes();
+                            timePeriod = endM - startM;
+                            let temp = {route: routes[i], time: timePeriod};
+                            route_times.push(temp);
+                            break;
+                        }
+                    }
+                }
+
+                var min = Number.MAX_VALUE;
+                var route;
+                
+                for (let i = 0; i < route_times.length; i++)
+                {
+                    if (route_times[i].time < min)
+                    {
+                        min = route_times[i].time;
+                        route = route_times[i];
+                    }
+                }
+
+                if (route.time == 0)
+                {
+                    agent.add('The next ' + route.route + ' is arriving at ' + stop + ' now.');
+                }
+                else
+                {
+                    agent.add('The next ' + route.route + ' arrives at ' + stop + ' in about ' + route.time + ' minutes.');
+                }
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
+        });
     }
 
     function getEstimatedETA_context_route(agent) {
         var contexts = agent.getContext('closeststopname');
-        var timePeriod;
+        var closest = contexts.parameters.ClosestStop;
+        var route = agent.parameters.busrouteid;
+        var timePeriod = -1;
+        console.log(closest);
 
-        agent.add('The next ' + agent.parameters.busrouteid + ' arrives at ' + contexts.parameter.ClosestStop + ' in about ' + timePeriod + ' minutes.');
+        var doc = db.collection('test_stop_times').doc(closest);
 
+        return doc.get().then(doc => {
+            if (!doc.exists) {
+                agent.add('No data found in the database');
+            } else {
+                if (typeof doc.data()[route] === 'undefined')
+                {
+                    // Route does not exist for this bus stop
+                    agent.add(route + ' does not service ' + closest + '.');
+                }
+                else
+                {
+                    var times = doc.data()[route];
+                    var date = new Date();
+
+                    // Locale time is UTC, EST is UTC - 5
+                    date.setHours(date.getHours() - 5);
+                    var curTime = date.toLocaleTimeString('en-us', {hour12: false});
+
+                    for (let i = 0; i < times.length; i++) {
+                        // Find first instance where it is less than
+                        if (curTime < times[i]) {
+                            var start = new Date("01/01/2021 " + curTime);
+                            var end = new Date("01/01/2021 " + times[i]);
+
+                            var startM = (start.getHours() * 60) + start.getMinutes();
+                            var endM = (end.getHours() * 60) + end.getMinutes();
+                            timePeriod = endM - startM;
+                            break;
+                        }
+                    }
+
+                    if (timePeriod == -1)
+                    {
+                        agent.add(route + ' has no more buses servicing ' + closest + ' today.');
+                    }
+                    else if (timePeriod == 0)
+                    {
+                        agent.add('The next ' + route + ' is arriving at ' + closest + ' now.');
+                    }
+                    else
+                    {
+                        agent.add('The next ' + route + ' arrives at ' + closest + ' in about ' + timePeriod + ' minutes.');
+                    }
+                }             
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
+        });
     }
 
     function getEstimatedETA_noContext_noRoute(agent) {
-        var soonestBusRouteID;
-        var timePeriod;
+        var timePeriod = -1;
+        var stop = agent.parameters.stopname;
+        var doc = db.collection('test_stop_times').doc(stop);
 
-        agent.add('The next ' + soonestBusRouteID + ' arrives at ' + agent.parameter.stopname + ' in about ' + timePeriod + ' minutes.');
+        return doc.get().then(doc => {
+            if (!doc.exists) {
+                agent.add('I\'m sorry, I can\'t seem to find a stop at ' + stop + '.');
+            } else {
+                var routes = doc.data().route_id;
+                var route_times = [];
 
+                for (let i = 0; i < routes.length; i++)
+                {
+                    var times = doc.data()[routes[i]];
+                    var date = new Date();
 
+                    // Locale time is UTC, EST is UTC - 5
+                    date.setHours(date.getHours() - 5);
+                    var curTime = date.toLocaleTimeString('en-us', {hour12: false});
+
+                    for (let j = 0; j < times.length; j++) {
+                        // Find first instance where it is less than
+                        if (curTime < times[j]) {
+                            var start = new Date("01/01/2021 " + curTime);
+                            var end = new Date("01/01/2021 " + times[j]);
+
+                            var startM = (start.getHours() * 60) + start.getMinutes();
+                            var endM = (end.getHours() * 60) + end.getMinutes();
+                            timePeriod = endM - startM;
+                            let temp = {route: routes[i], time: timePeriod};
+                            route_times.push(temp);
+                            break;
+                        }
+                    }
+                }
+
+                var min = Number.MAX_VALUE;
+                var route;
+                
+                for (let i = 0; i < route_times.length; i++)
+                {
+                    if (route_times[i].time < min)
+                    {
+                        min = route_times[i].time;
+                        route = route_times[i];
+                    }
+                }
+
+                if (route.time == 0)
+                {
+                    agent.add('The next ' + route.route + ' is arriving at ' + stop + ' now.');
+                }
+                else
+                {
+                    agent.add('The next ' + route.route + ' arrives at ' + stop + ' in about ' + route.time + ' minutes.');
+                }
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
+        });
     }
 
     function getEstimatedETA_noContext_route(agent) {
-        var timePeriod;
+        var timePeriod = -1;
+        var route = agent.parameters.busrouteid;
+        var stop = agent.parameters.stopname;
+        var doc = db.collection('test_stop_times').doc(stop);
 
-        agent.add('The next ' + agent.parameters.busrouteid + ' arrives at ' + agent.parameter.stopname + ' in about ' + timePeriod + ' minutes.');
+        return doc.get().then(doc => {
+            if (!doc.exists) {
+                agent.add('I\'m sorry, I can\'t seem to find a stop at ' + stop + '.');
+            } else {
+                if (typeof doc.data()[route] === 'undefined')
+                {
+                    // Route does not exist for this bus stop
+                    agent.add(route + ' does not service ' + stop + '.');
+                }
+                else
+                {
+                    var times = doc.data()[route];
+                    var date = new Date();
 
+                    // Locale time is UTC, EST is UTC - 5
+                    date.setHours(date.getHours() - 5);
+                    var curTime = date.toLocaleTimeString('en-us', {hour12: false});
 
+                    for (let i = 0; i < times.length; i++) {
+                        // Find first instance where it is less than
+                        if (curTime < times[i]) {
+                            var start = new Date("01/01/2021 " + curTime);
+                            var end = new Date("01/01/2021 " + times[i]);
+
+                            var startM = (start.getHours() * 60) + start.getMinutes();
+                            var endM = (end.getHours() * 60) + end.getMinutes();
+                            timePeriod = endM - startM;
+                            break;
+                        }
+                    }
+
+                    if (timePeriod == -1)
+                    {
+                        agent.add(route + ' has no more buses servicing ' + stop + ' today.');
+                    }
+                    else if (timePeriod == 0)
+                    {
+                        agent.add('The next ' + route + ' is arriving at ' + stop + ' now.');
+                    }
+                    else
+                    {
+                        agent.add('The next ' + route + ' arrives at ' + stop + ' in about ' + timePeriod + ' minutes.');
+                    }
+                }             
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
+        });
     }
 
     function getRouteID_context(agent) {
@@ -270,6 +489,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         });
     }
 
+    function getHelp() {
+    
+    }
+
     // Run the proper function handler based on the matched Dialogflow intent name
     let intentMap = new Map();
     intentMap.set('Default Welcome Intent', welcome);
@@ -278,10 +501,11 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('getEstimatedETA_context_route', getEstimatedETA_context_route);
     intentMap.set('getEstimatedETA_noContext_noRoute', getEstimatedETA_noContext_noRoute);
     intentMap.set('getEstimatedETA_noContext_route', getEstimatedETA_noContext_route);
-    intentMap.set('getClosestStopName-context', nameClosestStop_context);
+    intentMap.set('getClosestStopName-Context', nameClosestStop_context);
     intentMap.set('getClosestStopName-noContext', nameClosestStop_noContext);
     intentMap.set('getRouteID-context', getRouteID_context);
     intentMap.set('getRouteID-noContext', getRouteID_noContext);
     intentMap.set('getSomewhere', getSomewhere);
+    intentMap.set('getHelp', getHelp);
     agent.handleRequest(intentMap);
 });

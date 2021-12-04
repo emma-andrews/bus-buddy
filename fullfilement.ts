@@ -100,6 +100,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         ClosestStop: 'The HUB'
                     }
                 });
+
             }
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
@@ -119,7 +120,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             if (!doc.exists) {
                 agent.add('Unfortunately it does not seem like there is an RTS bus stop at that location. Is there anything else I can help you with?');
             } else {
-                var stopDescription = doc.data().stop_desc;              
+                var stopDescription = doc.data().stop_desc;
                 console.log();
                 agent.add('The nearest stop to ' + givenStop + ' is at ' + stopDescription);
             }
@@ -142,14 +143,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 var routes = doc.data().route_id;
                 var route_times = [];
 
-                for (let i = 0; i < routes.length; i++)
-                {
+                for (let i = 0; i < routes.length; i++) {
                     var times = doc.data()[routes[i]];
                     var date = new Date();
 
                     // Locale time is UTC, EST is UTC - 5
                     date.setHours(date.getHours() - 5);
-                    var curTime = date.toLocaleTimeString('en-us', {hour12: false});
+                    var curTime = date.toLocaleTimeString('en-us', { hour12: false });
 
                     for (let j = 0; j < times.length; j++) {
                         // Find first instance where it is less than
@@ -160,7 +160,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                             var startM = (start.getHours() * 60) + start.getMinutes();
                             var endM = (end.getHours() * 60) + end.getMinutes();
                             timePeriod = endM - startM;
-                            let temp = {route: routes[i], time: timePeriod};
+                            let temp = { route: routes[i], time: timePeriod };
                             route_times.push(temp);
                             break;
                         }
@@ -169,22 +169,18 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 var min = Number.MAX_VALUE;
                 var route;
-                
-                for (let i = 0; i < route_times.length; i++)
-                {
-                    if (route_times[i].time < min)
-                    {
+
+                for (let i = 0; i < route_times.length; i++) {
+                    if (route_times[i].time < min) {
                         min = route_times[i].time;
                         route = route_times[i];
                     }
                 }
 
-                if (route.time == 0)
-                {
+                if (route.time == 0) {
                     agent.add('The next ' + route.route + ' is arriving at ' + stop + ' now.');
                 }
-                else
-                {
+                else {
                     agent.add('The next ' + route.route + ' arrives at ' + stop + ' in about ' + route.time + ' minutes.');
                 }
             }
@@ -192,6 +188,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             agent.add('Error reading entry from the Firestore database.');
             agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
         });
+
     }
 
     function getEstimatedETA_context_route(agent) {
@@ -199,7 +196,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         var closest = contexts.parameters.ClosestStop;
         var route = agent.parameters.busrouteid;
         var timePeriod = -1;
-        console.log(closest);
 
         var doc = db.collection('test_stop_times').doc(closest);
 
@@ -207,19 +203,17 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             if (!doc.exists) {
                 agent.add('No data found in the database');
             } else {
-                if (typeof doc.data()[route] === 'undefined')
-                {
+                if (typeof doc.data()[route] === 'undefined') {
                     // Route does not exist for this bus stop
                     agent.add(route + ' does not service ' + closest + '.');
                 }
-                else
-                {
+                else {
                     var times = doc.data()[route];
                     var date = new Date();
 
                     // Locale time is UTC, EST is UTC - 5
                     date.setHours(date.getHours() - 5);
-                    var curTime = date.toLocaleTimeString('en-us', {hour12: false});
+                    var curTime = date.toLocaleTimeString('en-us', { hour12: false });
 
                     for (let i = 0; i < times.length; i++) {
                         // Find first instance where it is less than
@@ -234,19 +228,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         }
                     }
 
-                    if (timePeriod == -1)
-                    {
+                    if (timePeriod == -1) {
                         agent.add(route + ' has no more buses servicing ' + closest + ' today.');
                     }
-                    else if (timePeriod == 0)
-                    {
+                    else if (timePeriod == 0) {
                         agent.add('The next ' + route + ' is arriving at ' + closest + ' now.');
                     }
-                    else
-                    {
+                    else {
                         agent.add('The next ' + route + ' arrives at ' + closest + ' in about ' + timePeriod + ' minutes.');
                     }
-                }             
+                }
             }
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
@@ -266,14 +257,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 var routes = doc.data().route_id;
                 var route_times = [];
 
-                for (let i = 0; i < routes.length; i++)
-                {
+                for (let i = 0; i < routes.length; i++) {
                     var times = doc.data()[routes[i]];
                     var date = new Date();
 
                     // Locale time is UTC, EST is UTC - 5
                     date.setHours(date.getHours() - 5);
-                    var curTime = date.toLocaleTimeString('en-us', {hour12: false});
+                    var curTime = date.toLocaleTimeString('en-us', { hour12: false });
 
                     for (let j = 0; j < times.length; j++) {
                         // Find first instance where it is less than
@@ -284,7 +274,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                             var startM = (start.getHours() * 60) + start.getMinutes();
                             var endM = (end.getHours() * 60) + end.getMinutes();
                             timePeriod = endM - startM;
-                            let temp = {route: routes[i], time: timePeriod};
+                            let temp = { route: routes[i], time: timePeriod };
                             route_times.push(temp);
                             break;
                         }
@@ -293,22 +283,18 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 var min = Number.MAX_VALUE;
                 var route;
-                
-                for (let i = 0; i < route_times.length; i++)
-                {
-                    if (route_times[i].time < min)
-                    {
+
+                for (let i = 0; i < route_times.length; i++) {
+                    if (route_times[i].time < min) {
                         min = route_times[i].time;
                         route = route_times[i];
                     }
                 }
 
-                if (route.time == 0)
-                {
+                if (route.time == 0) {
                     agent.add('The next ' + route.route + ' is arriving at ' + stop + ' now.');
                 }
-                else
-                {
+                else {
                     agent.add('The next ' + route.route + ' arrives at ' + stop + ' in about ' + route.time + ' minutes.');
                 }
             }
@@ -328,19 +314,17 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             if (!doc.exists) {
                 agent.add('I\'m sorry, I can\'t seem to find a stop at ' + stop + '.');
             } else {
-                if (typeof doc.data()[route] === 'undefined')
-                {
+                if (typeof doc.data()[route] === 'undefined') {
                     // Route does not exist for this bus stop
                     agent.add(route + ' does not service ' + stop + '.');
                 }
-                else
-                {
+                else {
                     var times = doc.data()[route];
                     var date = new Date();
 
                     // Locale time is UTC, EST is UTC - 5
                     date.setHours(date.getHours() - 5);
-                    var curTime = date.toLocaleTimeString('en-us', {hour12: false});
+                    var curTime = date.toLocaleTimeString('en-us', { hour12: false });
 
                     for (let i = 0; i < times.length; i++) {
                         // Find first instance where it is less than
@@ -355,19 +339,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         }
                     }
 
-                    if (timePeriod == -1)
-                    {
+                    if (timePeriod == -1) {
                         agent.add(route + ' has no more buses servicing ' + stop + ' today.');
                     }
-                    else if (timePeriod == 0)
-                    {
+                    else if (timePeriod == 0) {
                         agent.add('The next ' + route + ' is arriving at ' + stop + ' now.');
                     }
-                    else
-                    {
+                    else {
                         agent.add('The next ' + route + ' arrives at ' + stop + ' in about ' + timePeriod + ' minutes.');
                     }
-                }             
+                }
             }
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
@@ -394,7 +375,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         routes: routes
                     }
                 });
-        
+
                 agent.add("The stop at " + closest + " is served by routes " + routes.join(", "));
             }
         }).catch(() => {
@@ -446,7 +427,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             if (!(docs[0].exists && docs[1].exists)) {
                 console.log('getSomewhere' + agent);
                 agent.add('No data found in the database!');
-            } else {   
+            } else {
                 console.log("got here 5");
                 var rDep = docs[1].data().route_id;
                 var rDest = docs[0].data().route_id;
@@ -462,29 +443,26 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                 var maxSizeToSpeak = 5;
                 // if the number of routes is 0
-                if(numberOfRoutes == 0)
-                {
+                if (numberOfRoutes == 0) {
                     agent.add("It looks like there aren't actually any routes in the RTS system that could get you from " +
-                    agent.parameters.DepartureStopName + " to " + agent.parameters.DestinationStopName);
+                        agent.parameters.DepartureStopName + " to " + agent.parameters.DestinationStopName);
                 }
                 // if the number of routes is more than 5
-                else if(numberOfRoutes > maxSizeToSpeak)
-                {
-                    agent.add("Many routes can get you from  " + agent.parameters.DepartureStopName + " to " + 
-                    agent.parameters.DestinationStopName + ". If you want the next five, say next five. " +
-                    "Here are the first couple: " + routesInCommon.slice(0,maxSizeToSpeak).join(", "));
+                else if (numberOfRoutes > maxSizeToSpeak) {
+                    agent.add("Many routes can get you from  " + agent.parameters.DepartureStopName + " to " +
+                        agent.parameters.DestinationStopName + ". If you want the next five, say next five. " +
+                        "Here are the first couple: " + routesInCommon.slice(0, maxSizeToSpeak).join(", "));
                     // Is there a way to listen for the user in here?
 
                 }
                 else    // otherwise, we know it worked and that there are less than 5 routes, so we want to tell people how to get there
                 {
-                    agent.add("I hear you want to get to " + agent.parameters.DestinationStopName + " from " + 
-                    agent.parameters.DepartureStopName + ". You can get there by taking routes " + routesInCommon.join(", "));
+                    agent.add("I hear you want to get to " + agent.parameters.DestinationStopName + " from " +
+                        agent.parameters.DepartureStopName + ". You can get there by taking routes " + routesInCommon.join(", "));
                 }
 
                 // if the number of routes is less than or equal to 5, the new list should be blank
-                if(numberOfRoutes <= maxSizeToSpeak)
-                {
+                if (numberOfRoutes <= maxSizeToSpeak) {
                     agent.setContext({
                         name: 'remaininglist',
                         lifespan: 1,
@@ -503,7 +481,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         }
                     });
                 }
-                
+
             }
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
@@ -512,8 +490,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     function getHelp() {
-    
+
     }
+
 
     function getNextFive() {
         console.log("started on the next five");
@@ -524,50 +503,46 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         var contexts2 = agent.getContext('remaininglist');
         console.log("contexts2 " + contexts2);
 
-        
+
         var routeList = contexts.parameters.remainingList;
         console.log(routeList);
         // determine length of the routes list
         var numberOfRoutes = routeList.length;
-        
+
         // if we somehow got here with an empty list
-        if(numberOfRoutes <= 0)
-        {
+        if (numberOfRoutes <= 0) {
             agent.add("Sorry there are no other routes that go there. ");
         }
         // if there are exactly 5 routes
-        else if(numberOfRoutes <= maxSizeToSpeak)
-        {
-            agent.add("Sure. Here are the remaining " + numberOfRoutes + " routes that could get you there. " + 
-            routeList.join(", "));
+        else if (numberOfRoutes <= maxSizeToSpeak) {
+            agent.add("Sure. Here are the remaining " + numberOfRoutes + " routes that could get you there. " +
+                routeList.join(", "));
         }
         else    // otherwise, there are more than 5
         {
             agent.add("Here are the next five routes that could get you there: " + routeList.slice(0, maxSizeToSpeak).join(", "));
         }
-        
+
         // if the number of routes is less than or equal to 5, the new list should be blank
-        if(numberOfRoutes <= maxSizeToSpeak)
-        {
+        if (numberOfRoutes <= maxSizeToSpeak) {
             agent.setContext({
-                name: 'remaininglist',
+                name: 'remainingList',
                 lifespan: 1,
                 parameters: {
                     remainingList: []
                 }
             });
         }
-        else    // there were more than 5 items on the list
-        {
+        else {
             agent.setContext({
-                name: 'remaininglist',
+                name: 'remainingList',
                 lifespan: 1,
                 parameters: {
-                    remainingList: routeList.slice(5)   // cut out the original 5 that we just said, and keep the remainder
+                    remainingList: routeList.slice(5)
                 }
             });
         }
-        
+
     }
 
     // Run the proper function handler based on the matched Dialogflow intent name

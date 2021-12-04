@@ -468,7 +468,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     agent.parameters.DepartureStopName + " to " + agent.parameters.DestinationStopName);
                 }
                 // if the number of routes is more than 5
-                if(numberOfRoutes > maxSizeToSpeak)
+                else if(numberOfRoutes > maxSizeToSpeak)
                 {
                     agent.add("Many routes can get you from  " + agent.parameters.DepartureStopName + " to " + 
                     agent.parameters.DestinationStopName + ". If you want the next five, say next five. " +
@@ -476,10 +476,32 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     // Is there a way to listen for the user in here?
 
                 }
-                else
+                else    // otherwise, we know it worked and that there are less than 5 routes, so we want to tell people how to get there
                 {
                     agent.add("I hear you want to get to " + agent.parameters.DestinationStopName + " from " + 
                     agent.parameters.DepartureStopName + ". You can get there by taking routes " + routesInCommon.join(", "));
+                }
+
+                // if the number of routes is less than or equal to 5, the new list should be blank
+                if(numberOfRoutes <= maxSizeToSpeak)
+                {
+                    agent.setContext({
+                        name: 'remaininglist',
+                        lifespan: 1,
+                        parameters: {
+                            remainingList: []
+                        }
+                    });
+                }
+                else    // there were more than 5 items on the list
+                {
+                    agent.setContext({
+                        name: 'remaininglist',
+                        lifespan: 1,
+                        parameters: {
+                            remainingList: routesInCommon.slice(5)   // cut out the original 5 that we just said, and keep the remainder
+                        }
+                    });
                 }
                 
             }
@@ -491,6 +513,61 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     function getHelp() {
     
+    }
+
+    function getNextFive() {
+        console.log("started on the next five");
+        var maxSizeToSpeak = 5; // maximum size we want it to list (we're defaulting to five)
+
+        var contexts = agent.getContext('remaininglist');
+        console.log("contexts " + contexts);
+        var contexts2 = agent.getContext('remaininglist');
+        console.log("contexts2 " + contexts2);
+
+        
+        var routeList = contexts.parameters.remainingList;
+        console.log(routeList);
+        // determine length of the routes list
+        var numberOfRoutes = routeList.length;
+        
+        // if we somehow got here with an empty list
+        if(numberOfRoutes <= 0)
+        {
+            agent.add("Sorry there are no other routes that go there. ");
+        }
+        // if there are exactly 5 routes
+        else if(numberOfRoutes <= maxSizeToSpeak)
+        {
+            agent.add("Sure. Here are the remaining " + numberOfRoutes + " routes that could get you there. " + 
+            routeList.join(", "));
+        }
+        else    // otherwise, there are more than 5
+        {
+            agent.add("Here are the next five routes that could get you there: " + routeList.slice(0, maxSizeToSpeak).join(", "));
+        }
+        
+        // if the number of routes is less than or equal to 5, the new list should be blank
+        if(numberOfRoutes <= maxSizeToSpeak)
+        {
+            agent.setContext({
+                name: 'remaininglist',
+                lifespan: 1,
+                parameters: {
+                    remainingList: []
+                }
+            });
+        }
+        else    // there were more than 5 items on the list
+        {
+            agent.setContext({
+                name: 'remaininglist',
+                lifespan: 1,
+                parameters: {
+                    remainingList: routeList.slice(5)   // cut out the original 5 that we just said, and keep the remainder
+                }
+            });
+        }
+        
     }
 
     // Run the proper function handler based on the matched Dialogflow intent name
@@ -507,5 +584,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('getRouteID-noContext', getRouteID_noContext);
     intentMap.set('getSomewhere', getSomewhere);
     intentMap.set('getHelp', getHelp);
+    intentMap.set('getNextFive', getNextFive);
     agent.handleRequest(intentMap);
 });

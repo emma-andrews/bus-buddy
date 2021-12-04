@@ -489,11 +489,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         });
     }
 
-    function getHelp() {
-
-    }
-
-
     function getNextFive() {
         console.log("started on the next five");
         var maxSizeToSpeak = 5; // maximum size we want it to list (we're defaulting to five)
@@ -558,7 +553,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('getRouteID-context', getRouteID_context);
     intentMap.set('getRouteID-noContext', getRouteID_noContext);
     intentMap.set('getSomewhere', getSomewhere);
-    intentMap.set('getHelp', getHelp);
     intentMap.set('getNextFive', getNextFive);
     agent.handleRequest(intentMap);
 });

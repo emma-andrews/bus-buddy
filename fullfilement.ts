@@ -584,6 +584,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     for (let i = index; i < times.length; i++)
                     {
                         // times to speak
+                        if(count >= 5)
+                        {
+                            break;
+                        }
                         count++;
                     }
 
@@ -608,12 +612,15 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     function getSchedule_Context()
     {
         // Schedule for route at stop
-        var stop = agent.getContext('departurestopname').DepartureStopName;
+        //var stop = agent.getContext('departurestopname').DepartureStopName;
         var route = agent.parameters.busrouteid;
         var index = -1;
         console.log("stop name: " + stop);
 
-        var doc = db.collection('test_stop_times').doc(stop);
+        var context = agent.getContext('departurestopname');
+        console.log("context: " + JSON.stringify(context));
+      	var stop = context.parameters.DepartureStopName;
+        console.log("stop name: " + stop);
 
         return doc.get().then(doc => {
             if (!doc.exists) {
@@ -644,6 +651,10 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     for (let i = index; i < times.length; i++)
                     {
                         // times to speak
+                        if(count >= 5)
+                        {
+                            break;
+                        }
                         count++;
                     }
 
@@ -653,6 +664,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     }
                     else
                     {
+                        console.log("count is " + count);
                         var sliced = times.slice(index, index + count).join(', ');
                         agent.add('The next buses that arrive at ' + stop + ' are ' + sliced);
                     }                   

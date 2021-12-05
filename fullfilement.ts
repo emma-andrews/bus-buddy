@@ -7,8 +7,6 @@ const { WebhookClient } = require('dialogflow-fulfillment');
 const { Card, Suggestion } = require('dialogflow-fulfillment');
 const admin = require("firebase-admin");
 
-const PLACEHOLDER = "[TODO IN FULFILLMENT]";
-
 process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
 
 const firebaseConfig = {
@@ -85,10 +83,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             if (!doc.exists) {
                 agent.add('No data found in the database!');
             } else {
-                //var textresponse = request.body.queryResult.fulfillmentText + " ";
-                //var s = doc.data().stop_name;
-                //textresponse = textresponse.replace(PLACEHOLDER, s);
-                //console.log('Manually setting The HUB as closest stop', s, PLACEHOLDER, textresponse);
                 var stopDesciption = doc.data().stop_desc;
 
                 console.log('Manually setting The HUB as closest stop');

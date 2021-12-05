@@ -418,10 +418,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         console.log("got here 0");
         var departureStop = agent.parameters.DepartureStopName;
         console.log("got here 1");
+        if (departureStop.toLowerCase() == destinationStop.toLowerCase()) {
+            console.log("trying to call getSomewhere with same departureStop and destinationStop", departureStop, destinationStop);
+            // agent.add('You are where you want to go now, please try a different location.');
+          	agent.add('There is no need to use a bus system if your destination is the same as the place of departure. Maybe consider some other places?');
+            return;
+        }
         var docDest = db.collection('test_stop_names').doc(destinationStop);
-        console.log("got here 2");
+        console.log("got here 2", destinationStop);
         var docDep = db.collection('test_stop_names').doc(departureStop);
-        console.log("got here 3");
+        console.log("got here 3", departureStop);
 
         return db.getAll(docDest, docDep).then(docs => {
             if (!(docs[0].exists && docs[1].exists)) {

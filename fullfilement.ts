@@ -753,7 +753,19 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 var rDest = docs[0].data().route_id;
 
                 var routesInCommon = getArraysIntersection(rDest, rDep);
-                if (routesInCommon.includes(route))
+                var included = false;
+
+                for (var i = 0; i < routesInCommon.length; i++)
+                {
+                    if (routesInCommon == route)
+                    {
+                        included = true;
+                        break;
+                    }
+                }
+                console.log(included);
+
+                if (included)
                 {
                     var destTimes = docs[0].data()[route];
                     var depTimes = docs[1].data()[route];

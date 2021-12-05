@@ -546,6 +546,140 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     }
 
+    function getSchedule_noContext()
+    {
+        // Schedule for route at stop
+        var stop = agent.parameters.stopname;
+        var route = agent.parameters.busrouteid;
+        var index = -1;
+
+        var doc = db.collection('test_stop_times').doc(stop);
+
+        return doc.get().then(doc => {
+            if (!doc.exists) {
+                agent.add('I\'m sorry, I can\'t seem to find a stop at ' + stop + '.');
+            } else {
+                if (typeof doc.data()[route] === 'undefined') {
+                    // Route does not exist for this bus stop
+                    agent.add(route + ' does not service ' + stop + '.');
+                }
+                else {
+                    var times = doc.data()[route];
+                    var date = new Date();
+
+                    // Locale time is UTC, EST is UTC - 5
+                    date.setHours(date.getHours() - 5);
+                    var curTime = date.toLocaleTimeString('en-us', { hour12: false });
+
+                    for (let i = 0; i < times.length; i++) {
+                        // Find first instance where it is less than
+                        if (curTime < times[i]) {
+                            index = i;
+                            break;
+                        }
+                    }
+
+                    var count = 0;
+
+                    for (let i = index; i < times.length; i++)
+                    {
+                        // times to speak
+                        count++;
+                    }
+
+                    if (count == 0)
+                    {
+                        agent.add('There are no more ' + route + ' servicing ' + stop + ' today.');
+                    }
+                    else
+                    {
+                        var sliced = times.slice(index, index + count).join(', ');
+                        agent.add('The next buses that arrive at ' + stop + ' are ' + sliced);
+                    }                   
+                }
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
+        });
+
+    }
+
+    function getSchedule_Context()
+    {
+        // Schedule for route at stop
+        var stop = agent.getContext('departurestopname').DepartureStopName;
+        var route = agent.parameters.busrouteid;
+        var index = -1;
+
+        var doc = db.collection('test_stop_times').doc(stop);
+
+        return doc.get().then(doc => {
+            if (!doc.exists) {
+                agent.add('I\'m sorry, I can\'t seem to find a stop at ' + stop + '.');
+            } else {
+                if (typeof doc.data()[route] === 'undefined') {
+                    // Route does not exist for this bus stop
+                    agent.add(route + ' does not service ' + stop + '.');
+                }
+                else {
+                    var times = doc.data()[route];
+                    var date = new Date();
+
+                    // Locale time is UTC, EST is UTC - 5
+                    date.setHours(date.getHours() - 5);
+                    var curTime = date.toLocaleTimeString('en-us', { hour12: false });
+
+                    for (let i = 0; i < times.length; i++) {
+                        // Find first instance where it is less than
+                        if (curTime < times[i]) {
+                            index = i;
+                            break;
+                        }
+                    }
+
+                    var count = 0;
+
+                    for (let i = index; i < times.length; i++)
+                    {
+                        // times to speak
+                        count++;
+                    }
+
+                    if (count == 0)
+                    {
+                        agent.add('There are no more ' + route + ' servicing ' + stop + ' today.');
+                    }
+                    else
+                    {
+                        var sliced = times.slice(index, index + count).join(', ');
+                        agent.add('The next buses that arrive at ' + stop + ' are ' + sliced);
+                    }                   
+                }
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add a entry to the database first by saying, "Write <your phrase> to the database"');
+        });
+    }
+
+    function getHowLong_context()
+    {
+        var departure = agent.getContext('departurestopname');
+        var destination = agent.getContext('destinationstopname');
+
+        
+
+    }
+
+    function getHowLong_noContext()
+    {
+        var departure = agent.parameters.DepartureStopName;
+        var destination = agent.parameters.DestinationStopName;
+
+
+    }
+
     // Run the proper function handler based on the matched Dialogflow intent name
     let intentMap = new Map();
     intentMap.set('Default Welcome Intent', welcome);
@@ -560,5 +694,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     intentMap.set('getRouteID-noContext', getRouteID_noContext);
     intentMap.set('getSomewhere', getSomewhere);
     intentMap.set('getNextFive', getNextFive);
+    intentMap.set('getSchedule-noContext', getSchedule_noContext);
+    intentMap.set('getSchedule-Context', getSchedule_Context);
+    intentMap.set('getHowLong-context', getHowLong_context);
+    intentMap.set('getHowLong-noContext', getHowLong_noContext);
     agent.handleRequest(intentMap);
 });

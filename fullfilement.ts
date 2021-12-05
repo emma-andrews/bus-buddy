@@ -540,12 +540,15 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     }
 
-    function getSchedule_noContext() {
+    function getSchedule_noContext()
+    {
+      console.log("getSchedule_noContext");
         // Schedule for route at stop
         var stop = agent.parameters.stopname;
         var route = agent.parameters.busrouteid;
         var index = -1;
-
+		console.log("stop: " + stop);
+      	console.log("route: " + route);
         var doc = db.collection('test_stop_times').doc(stop);
 
         return doc.get().then(doc => {
@@ -557,6 +560,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     agent.add(route + ' does not service ' + stop + '.');
                 }
                 else {
+                  console.log("getting times");
                     var times = doc.data()[route];
                     var date = new Date();
 
@@ -571,15 +575,27 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                             break;
                         }
                     }
+                  console.log("finished the first for loop");
 
                     var count = 0;
 
-                    for (let i = index; i < times.length; i++) {
+                    console.log("times.length is " + times.length);
+                    for (let i = index; i < times.length && count < 5; i++)
+                    {
                         // times to speak
-                        if (count >= 5) {
-                            break;
-                        }
                         count++;
+                    }
+                    console.log("count is " + count);
+
+                    for(let i = 0; i < count; i++)
+                    {
+                        let colonLoc = times[index + i].lastIndexOf(":");
+                        if(colonLoc > 0)
+                        {
+                            times[index+i] = times[index+i].substring(0,colonLoc);
+                            console.log("times[" + (i+index) + "]: " + times[index+i]);
+                        }
+                        //console.log("i + index is " + (i+index));
                     }
 
                     if (count == 0) {
@@ -587,7 +603,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     }
                     else {
                         var sliced = times.slice(index, index + count).join(', ');
-                        agent.add('The next buses that arrive at ' + stop + ' are ' + sliced);
+                        agent.add('The next buses that arrive at ' + stop + ' are at' + sliced);
                     }
                 }
             }
@@ -610,6 +626,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         var stop = context.parameters.DepartureStopName;
         console.log("stop name: " + stop);
 
+        var doc = db.collection('test_stop_times').doc(stop);
         return doc.get().then(doc => {
             if (!doc.exists) {
                 agent.add('I\'m sorry, I can\'t seem to find a stop at ' + stop + '.');
@@ -635,23 +652,41 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     }
 
                     var count = 0;
-
-                    for (let i = index; i < times.length; i++) {
+                    console.log("times.length: " + times.length);
+                    for (let i = index; i < times.length && count < 20; i++)
+                    {
                         // times to speak
-                        if (count >= 5) {
-                            break;
+                        if(count < 5)
+                        {
+                            count++;
                         }
-                        count++;
+                        //console.log("times type " + typeof(times[i]));
+                        
                     }
 
-                    if (count == 0) {
+                    for(let i = 0; i < count; i++)
+                    {
+                        let colonLoc = times[index + i].lastIndexOf(":");
+                        if(colonLoc > 0)
+                        {
+                            times[index+i] = times[index+i].substring(0,colonLoc);
+                        }
+                        
+                    }
+
+                    console.log("count: " + count);
+
+                    if (count == 0)
+                    {
                         agent.add('There are no more ' + route + ' servicing ' + stop + ' today.');
                     }
                     else {
                         console.log("count is " + count);
+                        
                         var sliced = times.slice(index, index + count).join(', ');
-                        agent.add('The next buses that arrive at ' + stop + ' are ' + sliced);
-                    }
+                        //sliced = sliced.replace("/:??/,","");
+                        agent.add('The next buses that arrive at ' + stop + ' are at ' + sliced);
+                    }                   
                 }
             }
         }).catch(() => {

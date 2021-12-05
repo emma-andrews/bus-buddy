@@ -667,17 +667,142 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     {
         var departure = agent.getContext('departurestopname');
         var destination = agent.getContext('destinationstopname');
-
+        var route = agent.parameters.BusRouteID;
+        var docDest = db.collection('test_stop_times').doc(destination);
+        var docDep = db.collection('test_stop_times').doc(departure);
         
+        return db.getAll(docDest, docDep).then(docs => {
+            if (!(docs[0].exists && docs[1].exists))
+            {
+                agent.add('No data found in the database!');
+            } 
+            else 
+            {
+                var rDep = docs[1].data().route_id;
+                var rDest = docs[0].data().route_id;
 
+                var routesInCommon = getArraysIntersection(rDest, rDep);
+                if (routesInCommon.includes(route))
+                {
+                    var destTimes = docs[0].data()[route];
+                    var depTimes = docs[1].data()[route];
+
+                    var date = new Date();
+
+                    // Locale time is UTC, EST is UTC - 5
+                    date.setHours(date.getHours() - 5);
+                    var curTime = date.toLocaleTimeString('en-us', { hour12: false });
+
+                    for (let i = 0; i < depTimes.length; i++) {
+                        // Find first instance where it is less than
+                        if (curTime < depTimes[i]) {
+                            var j = i + 2;
+
+                            if (j >= destTimes.length)
+                            {
+                                j = destTimes.length - 1;
+                            }
+
+                            var start = new Date("01/01/2021 " + depTimes[i]);
+                            var end = new Date("01/01/2021 " + destTimes[j]);
+                            var nextEnd = new Date("01/01/2021 " + destTimes[j + 1]);
+
+                            var startM = (start.getHours() * 60) + start.getMinutes();
+                            var endM = (end.getHours() * 60) + end.getMinutes();
+                            var timeBetween = endM - startM;
+                            
+                            if (timeBetween <= 0)
+                            {
+                                var nextEndM = (nextEnd.getHours() * 60) + nextEnd.getMinutes();
+                                timeBetween = nextEndM - startM;
+                            }
+
+                            agent.add('Traveling from ' + departure + ' to ' + destination + ' takes approximately ' + timeBetween + ' minutes.');
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    agent.add('Route ' + route + ' does not service these stops.');
+                }
+
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
+        });
     }
 
     function getHowLong_noContext()
     {
         var departure = agent.parameters.DepartureStopName;
         var destination = agent.parameters.DestinationStopName;
+        var route = agent.parameters.BusRouteID;
+        var docDest = db.collection('test_stop_times').doc(destination);
+        var docDep = db.collection('test_stop_times').doc(departure);
+        
+        return db.getAll(docDest, docDep).then(docs => {
+            if (!(docs[0].exists && docs[1].exists))
+            {
+                agent.add('No data found in the database!');
+            } 
+            else 
+            {
+                var rDep = docs[1].data().route_id;
+                var rDest = docs[0].data().route_id;
 
+                var routesInCommon = getArraysIntersection(rDest, rDep);
+                if (routesInCommon.includes(route))
+                {
+                    var destTimes = docs[0].data()[route];
+                    var depTimes = docs[1].data()[route];
 
+                    var date = new Date();
+
+                    // Locale time is UTC, EST is UTC - 5
+                    date.setHours(date.getHours() - 5);
+                    var curTime = date.toLocaleTimeString('en-us', { hour12: false });
+
+                    for (let i = 0; i < depTimes.length; i++) {
+                        // Find first instance where it is less than
+                        if (curTime < depTimes[i]) {
+                            var j = i + 2;
+
+                            if (j >= destTimes.length)
+                            {
+                                j = destTimes.length - 1;
+                            }
+
+                            var start = new Date("01/01/2021 " + depTimes[i]);
+                            var end = new Date("01/01/2021 " + destTimes[j]);
+                            var nextEnd = new Date("01/01/2021 " + destTimes[j + 1]);
+
+                            var startM = (start.getHours() * 60) + start.getMinutes();
+                            var endM = (end.getHours() * 60) + end.getMinutes();
+                            var timeBetween = endM - startM;
+                            
+                            if (timeBetween <= 0)
+                            {
+                                var nextEndM = (nextEnd.getHours() * 60) + nextEnd.getMinutes();
+                                timeBetween = nextEndM - startM;
+                            }
+
+                            agent.add('Traveling from ' + departure + ' to ' + destination + ' takes approximately ' + timeBetween + ' minutes.');
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    agent.add('Route ' + route + ' does not service these stops.');
+                }
+
+            }
+        }).catch(() => {
+            agent.add('Error reading entry from the Firestore database.');
+            agent.add('Please add an entry to the database first by saying, "Write <your phrase> to the database"');
+        });
     }
 
     // Run the proper function handler based on the matched Dialogflow intent name

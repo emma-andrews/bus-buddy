@@ -421,7 +421,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         if (departureStop.toLowerCase() == destinationStop.toLowerCase()) {
             console.log("trying to call getSomewhere with same departureStop and destinationStop", departureStop, destinationStop);
             // agent.add('You are where you want to go now, please try a different location.');
-          	agent.add('There is no need to use a bus system if your destination is the same as the place of departure. Maybe consider some other places?');
+            agent.add('It sounds like you have the same departure and destination stops of ' + departureStop + '. Maybe I misheard you. Could you please rephrase your request as "I want to go from A to B".');
             return;
         }
         var docDest = db.collection('test_stop_names').doc(destinationStop);
@@ -546,8 +546,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     }
 
-    function getSchedule_noContext()
-    {
+    function getSchedule_noContext() {
         // Schedule for route at stop
         var stop = agent.parameters.stopname;
         var route = agent.parameters.busrouteid;
@@ -581,25 +580,21 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                     var count = 0;
 
-                    for (let i = index; i < times.length; i++)
-                    {
+                    for (let i = index; i < times.length; i++) {
                         // times to speak
-                        if(count >= 5)
-                        {
+                        if (count >= 5) {
                             break;
                         }
                         count++;
                     }
 
-                    if (count == 0)
-                    {
+                    if (count == 0) {
                         agent.add('There are no more ' + route + ' servicing ' + stop + ' today.');
                     }
-                    else
-                    {
+                    else {
                         var sliced = times.slice(index, index + count).join(', ');
                         agent.add('The next buses that arrive at ' + stop + ' are ' + sliced);
-                    }                   
+                    }
                 }
             }
         }).catch(() => {
@@ -609,8 +604,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
     }
 
-    function getSchedule_Context()
-    {
+    function getSchedule_Context() {
         // Schedule for route at stop
         //var stop = agent.getContext('departurestopname').DepartureStopName;
         var route = agent.parameters.busrouteid;
@@ -619,7 +613,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
         var context = agent.getContext('departurestopname');
         console.log("context: " + JSON.stringify(context));
-      	var stop = context.parameters.DepartureStopName;
+        var stop = context.parameters.DepartureStopName;
         console.log("stop name: " + stop);
 
         return doc.get().then(doc => {
@@ -648,26 +642,22 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
                     var count = 0;
 
-                    for (let i = index; i < times.length; i++)
-                    {
+                    for (let i = index; i < times.length; i++) {
                         // times to speak
-                        if(count >= 5)
-                        {
+                        if (count >= 5) {
                             break;
                         }
                         count++;
                     }
 
-                    if (count == 0)
-                    {
+                    if (count == 0) {
                         agent.add('There are no more ' + route + ' servicing ' + stop + ' today.');
                     }
-                    else
-                    {
+                    else {
                         console.log("count is " + count);
                         var sliced = times.slice(index, index + count).join(', ');
                         agent.add('The next buses that arrive at ' + stop + ' are ' + sliced);
-                    }                   
+                    }
                 }
             }
         }).catch(() => {
@@ -676,27 +666,23 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         });
     }
 
-    function getHowLong_context()
-    {
+    function getHowLong_context() {
         var departure = agent.getContext('departurestopname');
         var destination = agent.getContext('destinationstopname');
         var route = agent.parameters.BusRouteID;
         var docDest = db.collection('test_stop_times').doc(destination);
         var docDep = db.collection('test_stop_times').doc(departure);
-        
+
         return db.getAll(docDest, docDep).then(docs => {
-            if (!(docs[0].exists && docs[1].exists))
-            {
+            if (!(docs[0].exists && docs[1].exists)) {
                 agent.add('No data found in the database!');
-            } 
-            else 
-            {
+            }
+            else {
                 var rDep = docs[1].data().route_id;
                 var rDest = docs[0].data().route_id;
 
                 var routesInCommon = getArraysIntersection(rDest, rDep);
-                if (routesInCommon.includes(route))
-                {
+                if (routesInCommon.includes(route)) {
                     var destTimes = docs[0].data()[route];
                     var depTimes = docs[1].data()[route];
 
@@ -711,8 +697,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         if (curTime < depTimes[i]) {
                             var j = i + 2;
 
-                            if (j >= destTimes.length)
-                            {
+                            if (j >= destTimes.length) {
                                 j = destTimes.length - 1;
                             }
 
@@ -723,9 +708,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                             var startM = (start.getHours() * 60) + start.getMinutes();
                             var endM = (end.getHours() * 60) + end.getMinutes();
                             var timeBetween = endM - startM;
-                            
-                            if (timeBetween <= 0)
-                            {
+
+                            if (timeBetween <= 0) {
                                 var nextEndM = (nextEnd.getHours() * 60) + nextEnd.getMinutes();
                                 timeBetween = nextEndM - startM;
                             }
@@ -735,11 +719,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         }
                     }
                 }
-                else
-                {
+                else {
                     agent.add('Route ' + route + ' does not service these stops.');
                 }
-
             }
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');
@@ -747,39 +729,33 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         });
     }
 
-    function getHowLong_noContext()
-    {
+    function getHowLong_noContext() {
         var departure = agent.parameters.DepartureStopName;
         var destination = agent.parameters.DestinationStopName;
         var route = agent.parameters.BusRouteID;
         var docDest = db.collection('test_stop_times').doc(destination);
         var docDep = db.collection('test_stop_times').doc(departure);
-        
+
         return db.getAll(docDest, docDep).then(docs => {
-            if (!(docs[0].exists && docs[1].exists))
-            {
+            if (!(docs[0].exists && docs[1].exists)) {
                 agent.add('No data found in the database!');
-            } 
-            else 
-            {
+            }
+            else {
                 var rDep = docs[1].data().route_id;
                 var rDest = docs[0].data().route_id;
 
                 var routesInCommon = getArraysIntersection(rDest, rDep);
                 var included = false;
 
-                for (var i = 0; i < routesInCommon.length; i++)
-                {
-                    if (routesInCommon == route)
-                    {
+                for (var i = 0; i < routesInCommon.length; i++) {
+                    if (routesInCommon == route) {
                         included = true;
                         break;
                     }
                 }
                 console.log(included);
 
-                if (included)
-                {
+                if (included) {
                     var destTimes = docs[0].data()[route];
                     var depTimes = docs[1].data()[route];
 
@@ -794,8 +770,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         if (curTime < depTimes[i]) {
                             var j = i + 2;
 
-                            if (j >= destTimes.length)
-                            {
+                            if (j >= destTimes.length) {
                                 j = destTimes.length - 1;
                             }
 
@@ -806,9 +781,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                             var startM = (start.getHours() * 60) + start.getMinutes();
                             var endM = (end.getHours() * 60) + end.getMinutes();
                             var timeBetween = endM - startM;
-                            
-                            if (timeBetween <= 0)
-                            {
+
+                            if (timeBetween <= 0) {
                                 var nextEndM = (nextEnd.getHours() * 60) + nextEnd.getMinutes();
                                 timeBetween = nextEndM - startM;
                             }
@@ -818,11 +792,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         }
                     }
                 }
-                else
-                {
+                else {
                     agent.add('Route ' + route + ' does not service these stops.');
                 }
-
             }
         }).catch(() => {
             agent.add('Error reading entry from the Firestore database.');

@@ -611,6 +611,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         var stop = agent.getContext('departurestopname').DepartureStopName;
         var route = agent.parameters.busrouteid;
         var index = -1;
+        console.log("stop name: " + stop);
 
         var doc = db.collection('test_stop_times').doc(stop);
 
